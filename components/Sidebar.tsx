@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
     Squares2X2Icon,
     ClockIcon,
@@ -27,7 +27,13 @@ const menuItems = [
 
 export default function Sidebar() {
     const pathname = usePathname();
+    const router = useRouter();
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Prefetch sidebar destinations so navigation feels instant
+        menuItems.forEach((item) => router.prefetch(item.href));
+    }, [router]);
 
     return (
         <aside className="w-20 bg-neutral-900 text-white flex flex-col items-center py-6 px-0 flex-shrink-0 overflow-y-auto relative">
