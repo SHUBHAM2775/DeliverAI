@@ -7,7 +7,7 @@ export default function Page() {
   const router = useRouter();
 
   useEffect(() => {
-    router.push("/overview");
+    router.push("/admin_page/overview");
   }, [router]);
 
   return null;

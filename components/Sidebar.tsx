@@ -15,14 +15,14 @@ import {
 } from "@heroicons/react/24/outline";
 
 const menuItems = [
-    { name: "Overview", href: "/overview", icon: Squares2X2Icon },
-    { name: "Slot Intelligence", href: "/slot-intelligence", icon: ClockIcon },
-    { name: "Route Planner", href: "/route-planner", icon: MapIcon },
-    { name: "Agents", href: "/agents", icon: UserGroupIcon },
-    { name: "Pre-Dispatch", href: "/pre-dispatch", icon: PaperAirplaneIcon },
-    { name: "Alerts", href: "/alerts", icon: ExclamationTriangleIcon },
-    { name: "Analytics", href: "/analytics", icon: ChartBarIcon },
-    { name: "Settings", href: "/settings", icon: Cog6ToothIcon },
+    { name: "Overview", href: "/admin_page/overview", icon: Squares2X2Icon },
+    { name: "Slot Intelligence", href: "/admin_page/slot-intelligence", icon: ClockIcon },
+    { name: "Route Planner", href: "/admin_page/route-planner", icon: MapIcon },
+    { name: "Agents", href: "/admin_page/agents", icon: UserGroupIcon },
+    { name: "Pre-Dispatch", href: "/admin_page/pre-dispatch", icon: PaperAirplaneIcon },
+    { name: "Alerts", href: "/admin_page/alerts", icon: ExclamationTriangleIcon },
+    { name: "Analytics", href: "/admin_page/analytics", icon: ChartBarIcon },
+    { name: "Settings", href: "/admin_page/settings", icon: Cog6ToothIcon },
 ];
 
 export default function Sidebar() {
