@@ -125,7 +125,7 @@ export default function PreDispatchPage() {
                 {/* Summary Cards */}
                 <div className="grid grid-cols-4 gap-6 mb-6">
                     {/* Confirmed Card */}
-                    <div className="bg-green-50 rounded-2xl p-6 border border-green-100">
+                    <div className="bg-[#D1FAE5] rounded-xl p-5">
                         <div className="flex items-center gap-3 mb-3">
                             <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
                                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,7 +138,7 @@ export default function PreDispatchPage() {
                     </div>
 
                     {/* Pending Card */}
-                    <div className="bg-yellow-50 rounded-2xl p-6 border border-yellow-100">
+                    <div className="bg-[#FEF3C7] rounded-xl p-5">
                         <div className="flex items-center gap-3 mb-3">
                             <div className="w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center">
                                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,7 +151,7 @@ export default function PreDispatchPage() {
                     </div>
 
                     {/* Unconfirmed Card */}
-                    <div className="bg-red-50 rounded-2xl p-6 border border-red-100">
+                    <div className="bg-[#FEE2E2] rounded-xl p-5">
                         <div className="flex items-center gap-3 mb-3">
                             <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center">
                                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,7 +164,7 @@ export default function PreDispatchPage() {
                     </div>
 
                     {/* AI High Risk Card */}
-                    <div className="bg-purple-50 rounded-2xl p-6 border border-purple-100">
+                    <div className="bg-[#F3E8FF] rounded-xl p-5">
                         <div className="flex items-center gap-3 mb-3">
                             <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center">
                                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,7 +178,7 @@ export default function PreDispatchPage() {
                 </div>
 
                 {/* Orders Table */}
-                <div className="bg-white rounded-2xl border border-gray-200">
+                <div className="bg-white rounded-xl border border-gray-200">
                     {/* Table Header */}
                     <div className="flex items-center justify-between p-6 border-b border-gray-200">
                         <h2 className="text-xl font-bold text-gray-900">Pre-Dispatch Orders</h2>

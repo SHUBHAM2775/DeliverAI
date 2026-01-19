@@ -16,7 +16,7 @@ export default function OverviewPage() {
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
           {/* Total Orders Today */}
-          <div className="bg-blue-50 rounded-2xl p-5 border-2 border-blue-200">
+          <div className="bg-[#DBEAFE] rounded-xl p-5">
             <div className="flex items-start justify-between mb-2">
               <div className="h-10 w-10 rounded-xl bg-blue-100 flex items-center justify-center">
                 <svg
@@ -39,7 +39,7 @@ export default function OverviewPage() {
           </div>
 
           {/* First Attempt Success */}
-          <div className="bg-green-50 rounded-2xl p-5 border-2 border-green-200">
+          <div className="bg-[#D1FAE5] rounded-xl p-5">
             <div className="flex items-start justify-between mb-2">
               <div className="h-10 w-10 rounded-xl bg-green-100 flex items-center justify-center">
                 <CheckCircleIcon className="h-5 w-5 text-green-600" strokeWidth="2" />
@@ -54,7 +54,7 @@ export default function OverviewPage() {
           </div>
 
           {/* Avg Delivery Time */}
-          <div className="bg-purple-50 rounded-2xl p-5 border-2 border-purple-200">
+          <div className="bg-[#F3E8FF] rounded-xl p-5">
             <div className="flex items-start justify-between mb-2">
               <div className="h-10 w-10 rounded-xl bg-purple-100 flex items-center justify-center">
                 <ClockIcon className="h-5 w-5 text-purple-600" strokeWidth="2" />
@@ -69,7 +69,7 @@ export default function OverviewPage() {
           </div>
 
           {/* High-Risk Deliveries */}
-          <div className="bg-yellow-50 rounded-2xl p-5 border-2 border-yellow-200">
+          <div className="bg-[#FEF3C7] rounded-xl p-5">
             <div className="flex items-start justify-between mb-2">
               <div className="h-10 w-10 rounded-xl bg-yellow-100 flex items-center justify-center">
                 <ShieldExclamationIcon className="h-5 w-5 text-yellow-600" strokeWidth="2" />
@@ -86,7 +86,7 @@ export default function OverviewPage() {
 
         {/* Delivery Performance Chart */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
-          <div className="lg:col-span-2 bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+          <div className="lg:col-span-2 bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
             <div className="mb-3">
               <h3 className="text-lg font-bold text-gray-900 mb-2">
                 Delivery Performance
@@ -302,7 +302,7 @@ export default function OverviewPage() {
           </div>
 
           {/* Top Performing Slots */}
-          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+          <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
             <h3 className="text-lg font-bold text-gray-900 mb-3">
               Top Performing Slots
             </h3>
@@ -421,7 +421,7 @@ export default function OverviewPage() {
         {/* Bottom Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
           {/* Active Agents */}
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-xs hover:shadow-sm transition">
+          <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-xs hover:shadow-sm transition">
             <h3 className="text-gray-400 text-xs font-medium mb-2">
               Active Agents
             </h3>
@@ -432,7 +432,7 @@ export default function OverviewPage() {
           </div>
 
           {/* Pending Confirmations */}
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-xs hover:shadow-sm transition">
+          <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-xs hover:shadow-sm transition">
             <h3 className="text-gray-400 text-xs font-medium mb-2">
               Pending Confirmations
             </h3>
@@ -443,7 +443,7 @@ export default function OverviewPage() {
           </div>
 
           {/* AI Predictions Accuracy */}
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-xs hover:shadow-sm transition">
+          <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-xs hover:shadow-sm transition">
             <h3 className="text-gray-400 text-xs font-medium mb-2">
               AI Predictions Accuracy
             </h3>

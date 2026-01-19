@@ -6,10 +6,10 @@ import { Star, MapPin } from "lucide-react";
 const getAvatarUrl = (seed: string) => `https://i.pravatar.cc/120?u=${encodeURIComponent(seed)}`;
 
 const statsData = [
-    { label: "Total Agents", value: "8", bgColor: "bg-blue-50" },
-    { label: "Active Now", value: "5", bgColor: "bg-green-50" },
-    { label: "Avg Rating", value: "4.7", bgColor: "bg-pink-50" },
-    { label: "Deliveries Today", value: "155", bgColor: "bg-yellow-50" },
+    { label: "Total Agents", value: "8", bgColor: "bg-[#DBEAFE]" },
+    { label: "Active Now", value: "5", bgColor: "bg-[#D1FAE5]" },
+    { label: "Avg Rating", value: "4.7", bgColor: "bg-[#FCE7F3]" },
+    { label: "Deliveries Today", value: "155", bgColor: "bg-[#FEF3C7]" },
 ];
 
 const topPerformers = [
@@ -19,7 +19,7 @@ const topPerformers = [
         rating: 4.9,
         success: "98%",
         tag: "Best for Morning Slots",
-        bgColor: "bg-yellow-50",
+        bgColor: "bg-[#FEF3C7]",
     },
     {
         name: "Emily Davis",
@@ -27,7 +27,7 @@ const topPerformers = [
         rating: 4.9,
         success: "97%",
         tag: "Long-Distance Specialist",
-        bgColor: "bg-pink-50",
+        bgColor: "bg-[#FCE7F3]",
     },
     {
         name: "Sarah Chen",
@@ -35,7 +35,7 @@ const topPerformers = [
         rating: 4.8,
         success: "96%",
         tag: "High-Volume Expert",
-        bgColor: "bg-blue-50",
+        bgColor: "bg-[#DBEAFE]",
     },
 ];
 
@@ -131,7 +131,7 @@ export default function AgentsPage() {
                 {/* Stats Cards */}
                 <div className="grid grid-cols-4 gap-6 mb-8">
                     {statsData.map((stat, idx) => (
-                        <div key={idx} className={`${stat.bgColor} rounded-2xl p-6 border border-gray-200`}>
+                        <div key={idx} className={`${stat.bgColor} rounded-xl p-5`}>
                             <div className="flex items-start justify-between">
                                 <div>
                                     <p className="text-gray-600 text-sm font-medium">{stat.label}</p>
@@ -149,7 +149,7 @@ export default function AgentsPage() {
                     </h3>
                     <div className="grid grid-cols-3 gap-6">
                         {topPerformers.map((performer, idx) => (
-                            <div key={idx} className={`${performer.bgColor} rounded-2xl p-6 border border-gray-200`}>
+                            <div key={idx} className={`${performer.bgColor} rounded-xl p-5`}>
                                 <div className="flex items-center gap-4 mb-4">
                                     <img
                                         src={getAvatarUrl(performer.id)}
@@ -186,7 +186,7 @@ export default function AgentsPage() {
                 {/* All Agents Table */}
                 <div>
                     <h3 className="text-lg font-bold text-gray-900 mb-4">All Agents</h3>
-                    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-gray-50 border-b border-gray-200">
