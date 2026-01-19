@@ -46,8 +46,8 @@ export default function Sidebar() {
                             <Link
                                 href={item.href}
                                 className={`p-2.5 rounded-lg transition block ${isActive
-                                        ? "bg-blue-600 text-white"
-                                        : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                                    ? "bg-blue-600 text-white"
+                                    : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
                                     }`}
                                 onMouseEnter={() => setHoveredItem(item.name)}
                                 onMouseLeave={() => setHoveredItem(null)}
