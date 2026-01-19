@@ -23,10 +23,10 @@ interface AlertItem {
 }
 
 const summaryCards = [
-    { label: "Total Alerts", value: 7, tone: "bg-blue-50", text: "text-blue-600", icon: BellAlertIcon },
-    { label: "Critical", value: 2, tone: "bg-rose-50", text: "text-rose-600", icon: ExclamationTriangleIcon },
-    { label: "Warnings", value: 3, tone: "bg-amber-50", text: "text-amber-600", icon: ExclamationTriangleIcon },
-    { label: "Unread", value: 3, tone: "bg-purple-50", text: "text-purple-600", icon: InformationCircleIcon },
+    { label: "Total Alerts", value: 7, tone: "bg-[#DBEAFE]", text: "text-blue-600", icon: BellAlertIcon },
+    { label: "Critical", value: 2, tone: "bg-[#FEE2E2]", text: "text-rose-600", icon: ExclamationTriangleIcon },
+    { label: "Warnings", value: 3, tone: "bg-[#FEF3C7]", text: "text-amber-600", icon: ExclamationTriangleIcon },
+    { label: "Unread", value: 3, tone: "bg-[#F3E8FF]", text: "text-purple-600", icon: InformationCircleIcon },
 ];
 
 const alerts: AlertItem[] = [
@@ -128,7 +128,7 @@ export default function AlertsPage() {
                             return (
                                 <div
                                     key={card.label}
-                                    className={`${card.tone} rounded-xl border border-gray-100 p-5 flex items-start gap-3 shadow-sm`}
+                                    className={`${card.tone} rounded-xl p-5 flex items-start gap-3 shadow-sm`}
                                 >
                                     <div className={`${card.text} bg-white/70 rounded-lg p-2 shadow-inner`}>{<Icon className="h-6 w-6" />}</div>
                                     <div>
@@ -140,7 +140,7 @@ export default function AlertsPage() {
                         })}
                     </div>
 
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
                         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                             <div>
                                 <h2 className="text-lg font-semibold text-gray-900">All Alerts</h2>
