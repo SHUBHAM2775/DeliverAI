@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/rubix';
+// Support both MONGODB_URI and MONGO_URI for compatibility with seed scripts
+const MONGODB_URI =
+  process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/rubix';
 
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable');
