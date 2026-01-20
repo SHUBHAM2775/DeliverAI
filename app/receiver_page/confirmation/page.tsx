@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
     CalendarIcon,
     MapPinIcon,
@@ -11,8 +12,81 @@ import {
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import ReceiverHeader from "@/components/ReceiverHeader";
 
+interface OrderDetails {
+    commodityName: string;
+    orderId: string;
+    deliveryAddress: string;
+}
+
 export default function ConfirmationPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
+    const [selectedSlot, setSelectedSlot] = useState<string>("");
+    const [selectedDate, setSelectedDate] = useState<string>("");
+    const [isConfirmed, setIsConfirmed] = useState(false);
+    const [confirmationError, setConfirmationError] = useState<string>("");
+
+    useEffect(() => {
+        const orderId = searchParams.get("orderId");
+        const date = searchParams.get("date");
+        const slot = searchParams.get("slot");
+        const uuid = searchParams.get("uuid");
+
+        if (!orderId || !date || !slot) {
+            setConfirmationError("Missing order or slot information");
+            return;
+        }
+
+        setSelectedDate(date);
+        setSelectedSlot(slot);
+
+        // Fetch order details
+        const fetchOrderDetails = async () => {
+            try {
+                const response = await fetch(`/api/orders?orderId=${orderId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const order = data.orders?.[0];
+                    if (order) {
+                        setOrderDetails({
+                            commodityName: order.commodity,
+                            orderId: order.id,
+                            deliveryAddress: order.area,
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch order details", error);
+            }
+        };
+
+        // Save slot confirmation to database
+        const saveConfirmation = async () => {
+            try {
+                const response = await fetch("/api/slot-confirmation", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ orderId, date, slot, uuid }),
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    console.error("Confirmation error:", data);
+                    setConfirmationError(data.error || "Failed to confirm slot");
+                } else {
+                    setIsConfirmed(true);
+                    console.log("Slot confirmed:", data);
+                }
+            } catch (error) {
+                console.error("Error saving confirmation", error);
+                setConfirmationError("Failed to save confirmation");
+            }
+        };
+
+        fetchOrderDetails();
+        saveConfirmation();
+    }, [searchParams]);
 
     const handleChangeSlot = () => {
         router.push("/receiver_page/slot-selection");
@@ -28,6 +102,19 @@ export default function ConfirmationPage() {
                 <ReceiverHeader title="Confirmation" subtitle="Receiver workspace" />
                 <div className="flex-1 flex items-center justify-center">
                     <div className="max-w-3xl w-full">
+                        {confirmationError ? (
+                            <div className="bg-red-50 rounded-2xl p-6 border border-red-200">
+                                <h2 className="text-2xl font-bold text-red-900 mb-2">Error</h2>
+                                <p className="text-red-700 mb-4">{confirmationError}</p>
+                                <button
+                                    onClick={() => router.push("/receiver_page/slot-selection")}
+                                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                                >
+                                    Go Back to Slot Selection
+                                </button>
+                            </div>
+                        ) : (
+                            <>
                         {/* Success Confirmation Card */}
                         <div className="bg-gradient-to-br from-green-100 to-emerald-100 rounded-3xl p-10 mb-6 relative overflow-hidden">
                             {/* Decorative circles */}
@@ -54,9 +141,9 @@ export default function ConfirmationPage() {
                                 <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
                                     <div className="flex items-center justify-center gap-3 mb-2">
                                         <CalendarIcon className="w-6 h-6 text-indigo-600" />
-                                        <h3 className="text-2xl font-bold text-gray-900">10:00 - 12:00 PM</h3>
+                                        <h3 className="text-2xl font-bold text-gray-900">{selectedSlot}</h3>
                                     </div>
-                                    <p className="text-center text-gray-600 text-sm">85% Success Rate</p>
+                                    <p className="text-center text-gray-600 text-sm">Date: {selectedDate}</p>
                                 </div>
 
                                 {/* Order Details */}
@@ -66,13 +153,13 @@ export default function ConfirmationPage() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                         </svg>
                                         <div>
-                                            <p className="font-semibold">Organic Grocery Bundle</p>
-                                            <p className="text-sm text-gray-500">Order #ORD-2847</p>
+                                            <p className="font-semibold">{orderDetails?.commodityName || "Order"}</p>
+                                            <p className="text-sm text-gray-500">Order #{orderDetails?.orderId || "N/A"}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3 text-gray-700">
                                         <MapPinIcon className="w-5 h-5 text-indigo-600 mt-0.5" />
-                                        <p className="text-sm">123 Green Valley Road, Apt 4B, New York, NY 10001</p>
+                                        <p className="text-sm">{orderDetails?.deliveryAddress || "N/A"}</p>
                                     </div>
                                 </div>
                             </div>
@@ -94,22 +181,17 @@ export default function ConfirmationPage() {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <button
-                                onClick={handleChangeSlot}
-                                className="py-4 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2"
-                            >
-                                <ArrowPathIcon className="w-5 h-5" />
-                                Change Slot
-                            </button>
+                        <div>
                             <button
                                 onClick={handleContactSupport}
-                                className="py-4 bg-indigo-600 rounded-xl text-white font-semibold hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+                                className="w-full py-4 bg-indigo-600 rounded-xl text-white font-semibold hover:bg-indigo-700 transition flex items-center justify-center gap-2"
                             >
                                 <ChatBubbleBottomCenterTextIcon className="w-5 h-5" />
                                 Contact Support
                             </button>
                         </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

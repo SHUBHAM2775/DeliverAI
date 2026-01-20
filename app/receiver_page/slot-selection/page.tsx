@@ -53,16 +53,14 @@ export default function SlotSelectionPage() {
 
     const daysWindow = generateDaysWindow();
 
-    const handleSuggestSlot = () => {
-        alert(`Suggested slot for ${preferredTime}:00 on ${selectedDate}`);
-    };
-
     const handleConfirmSlot = () => {
         if (!selectedSlot) {
             alert("Please select a time slot first");
             return;
         }
-        router.push("/receiver_page/confirmation");
+        // For demo purposes, use a sample order ID
+        const demoOrderId = "demo-order-123";
+        router.push(`/receiver_page/confirmation?orderId=${demoOrderId}&date=${selectedDate}&slot=${encodeURIComponent(selectedSlot)}`);
     };
 
     return (
@@ -167,18 +165,50 @@ export default function SlotSelectionPage() {
                             </div>
 
                             {/* Time Slider */}
-                            <div className="mb-5">
-                                <label className="block text-sm text-gray-600 mb-3">Preferred Time: {preferredTime}:00</label>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                                    Your Available Time: <span className="text-indigo-600">{preferredTime}:00</span>
+                                </label>
+                                <p className="text-xs text-gray-500 mb-2">Set your preferred time when you're available for delivery</p>
                                 <div className="relative">
                                     <input
                                         type="range"
                                         min="6"
                                         max="23"
                                         value={preferredTime}
-                                        onChange={(e) => setPreferredTime(Number(e.target.value))}
-                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                                        onChange={(e) => {
+                                            const newTime = Number(e.target.value);
+                                            setPreferredTime(newTime);
+                                            // Set this custom time as the selected slot
+                                            setSelectedSlot(`custom-${newTime}:00`);
+                                        }}
+                                        className="w-full h-3 bg-gradient-to-r from-orange-200 via-yellow-200 to-orange-200 rounded-lg appearance-none cursor-pointer"
+                                        style={{
+                                            background: `linear-gradient(to right, #fed7aa 0%, #fef3c7 50%, #fed7aa 100%)`
+                                        }}
                                     />
-                                    <div className="flex justify-between text-xs text-gray-400 mt-2">
+                                    <style jsx>{`
+                                        input[type="range"]::-webkit-slider-thumb {
+                                            appearance: none;
+                                            width: 20px;
+                                            height: 20px;
+                                            background: #4f46e5;
+                                            border-radius: 50%;
+                                            cursor: pointer;
+                                            border: 3px solid white;
+                                            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                                        }
+                                        input[type="range"]::-moz-range-thumb {
+                                            width: 20px;
+                                            height: 20px;
+                                            background: #4f46e5;
+                                            border-radius: 50%;
+                                            cursor: pointer;
+                                            border: 3px solid white;
+                                            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                                        }
+                                    `}</style>
+                                    <div className="flex justify-between text-xs text-gray-500 mt-3 font-medium">
                                         <span>6 AM</span>
                                         <span>12 PM</span>
                                         <span>6 PM</span>
@@ -186,14 +216,6 @@ export default function SlotSelectionPage() {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Suggest Button */}
-                            <button
-                                onClick={handleSuggestSlot}
-                                className="w-full py-3 bg-white border-2 border-orange-200 rounded-xl text-orange-600 font-medium hover:bg-orange-50 transition"
-                            >
-                                Suggest This Slot
-                            </button>
                         </div>
 
                         {/* Confirm Button */}
