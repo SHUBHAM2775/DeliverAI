@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import connectDB from "@/lib/db";
 import OrderModel from "@/models/Order";
 import UserModel from "@/models/User";
+import UniqueLinkModel from "@/models/UniqueLink";
 import { sendDeliveryConfirmationEmail } from "@/services/emailService";
 
 type DeliverySlotInput = {
@@ -214,13 +215,45 @@ export async function POST(req: Request) {
       receiverPhone: phone,
     });
 
+    // Create unique link entry immediately after order creation
+    try {
+      await UniqueLinkModel.create({
+        uuid: confirmationUuid,
+        orderId: orderDoc._id,
+        isUsed: false,
+      });
+      console.log("Unique link created", {
+        uuid: confirmationUuid,
+        orderId: orderDoc._id,
+      });
+    } catch (linkError) {
+      console.error("Failed to create unique link", {
+        uuid: confirmationUuid,
+        orderId: orderDoc._id,
+        error: linkError,
+      });
+      // Continue even if unique link creation fails, but log it
+    }
+
     let emailStatus: { sent: boolean; error?: string } = { sent: false };
 
     // Email sending; the order is created even if email fails.
     if (email) {
+      const orderDetails = {
+        commodityName: itemName,
+        commodityCategory: category,
+        description,
+        quantity,
+        isFragile: Boolean(isFragile),
+        deliveryAddress: address,
+        area,
+        pincode,
+        customerName,
+      };
       const emailResult = await sendDeliveryConfirmationEmail(
         email,
         confirmationUuid,
+        orderDetails,
       );
       emailStatus = {
         sent: emailResult.success,
