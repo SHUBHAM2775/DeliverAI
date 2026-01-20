@@ -6,13 +6,13 @@ import { useEffect, useState } from "react";
 import {
     Squares2X2Icon,
     PlusIcon,
-    UserIcon,
+    ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 
 const senderMenuItems = [
     { name: "Dashboard", href: "/sender_page/dashboard", icon: Squares2X2Icon },
     { name: "New Delivery", href: "/sender_page/delivery-form", icon: PlusIcon },
-    { name: "Profile", href: "/sender_page/profile", icon: UserIcon },
+    { name: "Emergency SOS", href: "/sender_page/emergency", icon: ExclamationTriangleIcon },
 ];
 
 export default function SenderSidebar() {
@@ -64,24 +64,6 @@ export default function SenderSidebar() {
                     );
                 })}
             </nav>
-
-            {/* Bottom section */}
-            <div className="mt-auto pt-4 border-t border-neutral-800 relative">
-                <div
-                    className="p-2.5 rounded-lg text-orange-400 hover:bg-neutral-800 transition cursor-pointer block"
-                    onMouseEnter={() => setHoveredItem("Sender Portal")}
-                    onMouseLeave={() => setHoveredItem(null)}
-                >
-                    <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-                    </svg>
-                </div>
-                {hoveredItem === "Sender Portal" && (
-                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-black px-3 py-1.5 rounded-md whitespace-nowrap text-sm font-medium text-white pointer-events-none z-50">
-                        Sender Portal
-                    </div>
-                )}
-            </div>
         </aside>
     );
 }

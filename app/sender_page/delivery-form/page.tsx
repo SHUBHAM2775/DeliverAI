@@ -237,7 +237,7 @@ export default function DeliveryFormPage() {
                             <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center">1</span>
                         </button>
                         <div 
-                            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition relative"
+                            className="flex items-center gap-2 cursor-pointer transition relative"
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
                         >
                             <span className="text-sm font-medium text-gray-700">Rahul Sharma</span>

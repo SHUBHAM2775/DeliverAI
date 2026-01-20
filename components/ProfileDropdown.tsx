@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
     UserIcon,
@@ -23,6 +23,7 @@ interface ProfileDropdownProps {
 export default function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement | null>(null);
 
     const [editData, setEditData] = useState({
         shopName: "Green Valley Apartments",
@@ -30,6 +31,19 @@ export default function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProp
         contact: "+1 555 123 4567",
         email: "john.doe@greenvalley.com",
     });
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                onClose();
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [isOpen, onClose]);
 
     if (!isOpen) return null;
 
@@ -66,15 +80,10 @@ export default function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProp
     };
 
     return (
-        <>
-            {/* Backdrop with opacity */}
-            <div 
-                className="fixed inset-0 z-40 bg-black/60"
-                onClick={onClose}
-            />
-
-            {/* Dropdown */}
-            <div className="absolute top-full right-0 mt-2 z-50 w-[380px] bg-white rounded-xl shadow-2xl border border-gray-100">
+        <div
+            ref={dropdownRef}
+            className="absolute top-[calc(100%+10px)] right-0 z-50 w-[360px] bg-white rounded-xl shadow-2xl border border-gray-100"
+        >
                 {/* Header with Shop Info */}
                 <div className="p-5 pb-4 border-b border-gray-100">
                     <div className="flex items-center gap-3">
@@ -215,7 +224,6 @@ export default function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProp
                         </button>
                     )}
                 </div>
-            </div>
-        </>
+        </div>
     );
 }

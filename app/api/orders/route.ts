@@ -48,12 +48,8 @@ async function upsertReceiver({
   email?: string;
   phone?: string;
 }) {
-  const query: Record<string, unknown> = {};
-  if (email) query.email = email;
-  if (phone) query.phone = phone;
-
   // If neither email nor phone provided, create a fresh receiver entry keyed by name.
-  if (Object.keys(query).length === 0) {
+  if (!email && !phone) {
     return (
       await UserModel.create({
         role: "RECEIVER",
@@ -63,23 +59,33 @@ async function upsertReceiver({
     )._id;
   }
 
-  const update: Record<string, unknown> = {
-    $setOnInsert: {
+  // Try to find an existing receiver by email, then by phone
+  const existingByEmail = email ? await UserModel.findOne({ email }).lean() : null;
+  if (existingByEmail) return existingByEmail._id;
+
+  const existingByPhone = phone ? await UserModel.findOne({ phone }).lean() : null;
+  if (existingByPhone) return existingByPhone._id;
+
+  // Create receiver; retry once if a duplicate key races in
+  try {
+    const receiver = await UserModel.create({
       role: "RECEIVER",
       status: "ACTIVE",
-    },
-  };
-
-  if (name) {
-    update.$set = { name };
+      name,
+      email,
+      phone,
+    });
+    return receiver._id;
+  } catch (err) {
+    const isDup = (err as any)?.code === 11000;
+    if (isDup) {
+      const fallback = email
+        ? await UserModel.findOne({ email }).lean()
+        : await UserModel.findOne({ phone }).lean();
+      if (fallback) return fallback._id;
+    }
+    throw err;
   }
-
-  const receiver = await UserModel.findOneAndUpdate(query, update, {
-    upsert: true,
-    new: true,
-  });
-
-  return receiver._id;
 }
 
 export async function GET(req: Request) {
@@ -115,6 +121,7 @@ export async function GET(req: Request) {
       commodity: order.commodityName,
       category: order.commodityCategory || "N/A",
       customer: order.receiverId?.name || "Unknown",
+      customerEmail: order.receiverId?.email,
       area: order.area,
       pincode: order.pincode,
       workingHours: order.workingStartTime && order.workingEndTime
@@ -125,6 +132,8 @@ export async function GET(req: Request) {
       quantity: order.quantity,
       isFragile: order.isFragile,
       createdAt: order.createdAt,
+      pickupLat: order.geoLocation?.latitude,
+      pickupLng: order.geoLocation?.longitude,
     }));
 
     return NextResponse.json({ orders: formattedOrders });

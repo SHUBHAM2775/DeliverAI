@@ -149,3 +149,109 @@ export async function sendDeliveryConfirmationEmail(
   }
 }
 
+export async function sendEmergencyAlertEmail(
+  toEmail: string,
+  customerName: string,
+  confirmationUuid: string,
+  disruption: string,
+): Promise<{ success: boolean; error?: string }> {
+  const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER;
+
+  if (!fromEmail) {
+    const message = "SMTP_FROM_EMAIL or SMTP_USER must be configured";
+    console.error(message);
+    return { success: false, error: message };
+  }
+
+  if (!toEmail) {
+    const message = "Recipient email is missing";
+    console.error(message);
+    return { success: false, error: message };
+  }
+
+  const rescheduleUrl = buildDeliveryConfirmationUrl(confirmationUuid);
+
+  const subject = "🚨 Delivery Disruption Alert - Reschedule Your Slots";
+
+  const textLines = [
+    `Hello ${customerName || "Valued Customer"},`,
+    "",
+    "⚠️  URGENT: Your scheduled delivery has encountered a disruption.",
+    "",
+    "Reason:",
+    disruption,
+    "",
+    "What you need to do:",
+    "Please click the link below to reschedule your delivery slots at your earliest convenience.",
+    "",
+    rescheduleUrl,
+    "",
+    "We apologize for the inconvenience and appreciate your understanding.",
+    "– Smart Delivery System",
+  ];
+
+  const textBody = textLines.join("\n");
+
+  const htmlBody = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background-color: #fee2e2; border-left: 4px solid #dc2626; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+        <h2 style="color: #991b1b; margin-top: 0;">🚨 Delivery Disruption Alert</h2>
+        <p style="color: #7f1d1d; margin: 0;">Your scheduled delivery has encountered a disruption and requires rescheduling.</p>
+      </div>
+
+      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #92400e;">Reason for Disruption:</h3>
+        <p style="color: #78350f; margin: 0; line-height: 1.6;">${disruption}</p>
+      </div>
+
+      <p style="color: #1f2937; font-size: 16px; margin: 20px 0;">
+        <strong>What you need to do:</strong><br/>
+        Please reschedule your delivery slots at your earliest convenience by clicking the button below.
+      </p>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${rescheduleUrl}" target="_blank" rel="noopener noreferrer" style="background-color: #dc2626; color: white; padding: 14px 40px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; font-size: 16px;">
+          Reschedule Delivery Slots
+        </a>
+      </div>
+
+      <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 4px; margin: 20px 0;">
+        <p style="color: #1e40af; margin: 0; font-size: 14px;">
+          <strong>Note:</strong> Once you reschedule, we will process your new delivery at the earliest possible time. Thank you for your patience!
+        </p>
+      </div>
+
+      <p style="color: #666; font-size: 12px; margin-top: 30px; text-align: center;">– Smart Delivery System</p>
+    </div>
+  `;
+
+  try {
+    const info = await transporter.sendMail({
+      from: fromEmail,
+      to: toEmail,
+      subject,
+      text: textBody,
+      html: htmlBody,
+    });
+
+    console.log("Emergency alert email sent", {
+      to: toEmail,
+      messageId: info.messageId,
+      accepted: info.accepted,
+      rejected: info.rejected,
+    });
+
+    return { success: true };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unknown error while sending email";
+
+    console.error("Failed to send emergency alert email", {
+      to: toEmail,
+      error: message,
+    });
+
+    return { success: false, error: message };
+  }
+}
+
