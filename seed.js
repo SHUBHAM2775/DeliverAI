@@ -1,7 +1,7 @@
 /**
  * COMPREHENSIVE UNIFIED SEED SCRIPT
  * Consolidates seed-all.js, seed.js, and seedDrivers.js into one file
- * 
+ *
  * Creates:
  * - Basic users (Admin, Sender, Receiver, Agents)
  * - Delivery agents with GPS locations (5 AVAILABLE, 5 ON_ROUTE)
@@ -14,7 +14,7 @@
  * - Slot confirmations
  * - Notifications
  * - Delivery feedback
- * 
+ *
  * Run: node seed.js
  */
 
@@ -47,10 +47,10 @@ const testLocations = [
   { lat: 19.2183, lng: 72.8469, name: "Borivali" },
   { lat: 19.1136, lng: 72.8697, name: "Andheri" },
   { lat: 19.0596, lng: 72.8295, name: "Bandra" },
-  { lat: 19.0760, lng: 72.8777, name: "Dadar" },
+  { lat: 19.076, lng: 72.8777, name: "Dadar" },
   { lat: 18.9676, lng: 72.8194, name: "Fort" },
   { lat: 19.2039, lng: 72.8521, name: "Malad" },
-  { lat: 19.1440, lng: 72.8479, name: "Kala Ghoda" },
+  { lat: 19.144, lng: 72.8479, name: "Kala Ghoda" },
   { lat: 19.0176, lng: 72.8479, name: "Colaba" },
 ];
 
@@ -173,12 +173,12 @@ async function seed() {
       console.log(`   Email: ${agentUser.email}`);
       console.log(`   Status: ${agentData.currentStatus}`);
       console.log(
-        `   Current Location: ${location.name} (${location.lat}, ${location.lng})`
+        `   Current Location: ${location.name} (${location.lat}, ${location.lng})`,
       );
       if (!isAvailable && agentData.currentTargetLocation) {
         const target = targetLocations[(i - 6) % targetLocations.length];
         console.log(
-          `   Target Location: ${target.name} (${target.lat}, ${target.lng})`
+          `   Target Location: ${target.name} (${target.lat}, ${target.lng})`,
         );
       }
       console.log("");
@@ -589,8 +589,12 @@ async function seed() {
     if (sampleAgent) {
       console.log("\n📍 Sample Agent (with location):");
       console.log(`   _id: ${sampleAgent._id}`);
-      console.log(`   currentLocation: ${JSON.stringify(sampleAgent.currentLocation)}`);
-      console.log(`   currentTargetLocation: ${JSON.stringify(sampleAgent.currentTargetLocation)}`);
+      console.log(
+        `   currentLocation: ${JSON.stringify(sampleAgent.currentLocation)}`,
+      );
+      console.log(
+        `   currentTargetLocation: ${JSON.stringify(sampleAgent.currentTargetLocation)}`,
+      );
       console.log(`   currentStatus: ${sampleAgent.currentStatus}`);
     }
 
