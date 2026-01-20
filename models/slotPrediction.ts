@@ -1,4 +1,4 @@
-import { Schema, model, models, Document, Types } from 'mongoose';
+import { Schema, model, models, Document, Types } from "mongoose";
 
 interface DeliveryLocation {
   latitude?: number;
@@ -21,13 +21,17 @@ const deliveryLocationSchema = new Schema<DeliveryLocation>(
     latitude: { type: Number },
     longitude: { type: Number },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const slotPredictionSchema = new Schema<SlotPrediction>(
   {
     area: { type: String, required: true },
-    slotId: { type: Schema.Types.ObjectId, ref: 'DeliverySlot', required: true },
+    slotId: {
+      type: Schema.Types.ObjectId,
+      ref: "DeliverySlot",
+      required: true,
+    },
     predictedSuccessProbability: { type: Number },
     store_id: { type: String },
     pickup_availability_window: { type: String },
@@ -35,9 +39,11 @@ const slotPredictionSchema = new Schema<SlotPrediction>(
     parcel_category: { type: String },
     delivery_location: { type: deliveryLocationSchema },
   },
-  { collection: 'slot_predictions' }
+  { collection: "slot_predictions" },
 );
 
-const SlotPredictionModel = models.SlotPrediction || model<SlotPrediction>('SlotPrediction', slotPredictionSchema);
+const SlotPredictionModel =
+  models.SlotPrediction ||
+  model<SlotPrediction>("SlotPrediction", slotPredictionSchema);
 
 export default SlotPredictionModel;

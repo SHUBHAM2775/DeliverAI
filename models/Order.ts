@@ -1,4 +1,4 @@
-import { Schema, model, models, Document, Types } from 'mongoose';
+import { Schema, model, models, Document, Types } from "mongoose";
 
 interface GeoLocation {
   latitude?: number;
@@ -17,7 +17,7 @@ export interface Order extends Document {
   area: string;
   pincode: string;
   geoLocation?: GeoLocation;
-  orderStatus: 'CREATED' | 'CONFIRMED' | 'DELIVERED' | 'FAILED';
+  orderStatus: "CREATED" | "CONFIRMED" | "DELIVERED" | "FAILED";
   deliveryDate?: Date;
   finalSlotId?: Types.ObjectId;
   deliveryAttemptCount: number;
@@ -30,14 +30,14 @@ const geoLocationSchema = new Schema<GeoLocation>(
     latitude: { type: Number },
     longitude: { type: Number },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const orderSchema = new Schema<Order>(
   {
-    senderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    receiverId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    agentId: { type: Schema.Types.ObjectId, ref: 'User' },
+    senderId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    receiverId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    agentId: { type: Schema.Types.ObjectId, ref: "User" },
     commodityName: { type: String, required: true },
     commodityCategory: { type: String },
     isFragile: { type: Boolean, default: false },
@@ -46,16 +46,20 @@ const orderSchema = new Schema<Order>(
     area: { type: String, required: true },
     pincode: { type: String, required: true },
     geoLocation: { type: geoLocationSchema },
-    orderStatus: { type: String, enum: ['CREATED', 'CONFIRMED', 'DELIVERED', 'FAILED'], default: 'CREATED' },
+    orderStatus: {
+      type: String,
+      enum: ["CREATED", "CONFIRMED", "DELIVERED", "FAILED"],
+      default: "CREATED",
+    },
     deliveryDate: { type: Date },
-    finalSlotId: { type: Schema.Types.ObjectId, ref: 'DeliverySlot' },
+    finalSlotId: { type: Schema.Types.ObjectId, ref: "DeliverySlot" },
     deliveryAttemptCount: { type: Number, default: 0 },
     firstAttemptSuccess: { type: Boolean },
     createdAt: { type: Date },
   },
-  { timestamps: true, collection: 'orders' }
+  { timestamps: true, collection: "orders" },
 );
 
-const OrderModel = models.Order || model<Order>('Order', orderSchema);
+const OrderModel = models.Order || model<Order>("Order", orderSchema);
 
 export default OrderModel;

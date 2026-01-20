@@ -1,4 +1,4 @@
-import { Schema, model, models, Document } from 'mongoose';
+import { Schema, model, models, Document } from "mongoose";
 
 export interface DeliverySlot extends Document {
   date: Date;
@@ -10,7 +10,7 @@ export interface DeliverySlot extends Document {
   isEnabled: boolean;
   isAiRecommended: boolean;
   successProbability?: number;
-  riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH';
+  riskLevel?: "LOW" | "MEDIUM" | "HIGH";
 }
 
 const deliverySlotSchema = new Schema<DeliverySlot>(
@@ -24,11 +24,13 @@ const deliverySlotSchema = new Schema<DeliverySlot>(
     isEnabled: { type: Boolean, default: true },
     isAiRecommended: { type: Boolean, default: false },
     successProbability: { type: Number },
-    riskLevel: { type: String, enum: ['LOW', 'MEDIUM', 'HIGH'] },
+    riskLevel: { type: String, enum: ["LOW", "MEDIUM", "HIGH"] },
   },
-  { collection: 'delivery_slots' }
+  { collection: "delivery_slots" },
 );
 
-const DeliverySlotModel = models.DeliverySlot || model<DeliverySlot>('DeliverySlot', deliverySlotSchema);
+const DeliverySlotModel =
+  models.DeliverySlot ||
+  model<DeliverySlot>("DeliverySlot", deliverySlotSchema);
 
 export default DeliverySlotModel;
