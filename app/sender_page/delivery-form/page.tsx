@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import type { ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import ProfileDropdown from "@/components/ProfileDropdown";
 import {
@@ -10,21 +11,8 @@ import {
     PlusIcon,
     XMarkIcon,
     CalendarIcon,
+    MapPinIcon,
 } from "@heroicons/react/24/outline";
-
-// Time slots options
-const timeSlots = [
-    "9:00 AM - 10:00 AM",
-    "10:00 AM - 11:00 AM",
-    "11:00 AM - 12:00 PM",
-    "12:00 PM - 1:00 PM",
-    "1:00 PM - 2:00 PM",
-    "2:00 PM - 3:00 PM",
-    "3:00 PM - 4:00 PM",
-    "4:00 PM - 5:00 PM",
-    "5:00 PM - 6:00 PM",
-    "6:00 PM - 7:00 PM",
-];
 
 const categories = [
     "Electronics",
@@ -38,13 +26,20 @@ const categories = [
 ];
 
 interface DeliverySlot {
-    date: string;
-    timeSlot: string;
+    startTime: string;
+    endTime: string;
 }
 
 export default function DeliveryFormPage() {
     const router = useRouter();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+    // Sender profile state
+    const [shopName, setShopName] = useState<string>("");
+    const [shopContact, setShopContact] = useState<string>("");
+    const [shopStartHour, setShopStartHour] = useState<number | null>(null);
+    const [shopEndHour, setShopEndHour] = useState<number | null>(null);
+    const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
     // Form state
     const [customerName, setCustomerName] = useState("");
@@ -61,13 +56,53 @@ export default function DeliveryFormPage() {
     const [isFragile, setIsFragile] = useState(false);
     const [itemImage, setItemImage] = useState<File | null>(null);
 
+    const [pickupLat, setPickupLat] = useState("");
+    const [pickupLng, setPickupLng] = useState("");
+    const [locStatus, setLocStatus] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState("");
+
     const [deliverySlots, setDeliverySlots] = useState<DeliverySlot[]>([
-        { date: "", timeSlot: "" }
+        { startTime: "", endTime: "" }
     ]);
+
+    const toTimeString = (hour: number | null | undefined) =>
+        hour === null || hour === undefined ? "" : `${String(hour).padStart(2, "0")}:00`;
+
+    // Fetch sender profile on mount
+    useEffect(() => {
+        const fetchSenderProfile = async () => {
+            try {
+                setIsLoadingProfile(true);
+                const response = await fetch("/api/sender-profile");
+                if (response.ok) {
+                    const data = await response.json();
+                    setShopName(data.organizationName || "");
+                    setShopContact(data.phone || data.email || "");
+                    setShopStartHour(data.startHour ?? null);
+                    setShopEndHour(data.endHour ?? null);
+
+                    const start = toTimeString(data.startHour);
+                    const end = toTimeString(data.endHour);
+                    if (start || end) {
+                        setDeliverySlots([{ startTime: start, endTime: end }]);
+                    }
+                } else {
+                    console.error("Failed to fetch sender profile");
+                }
+            } catch (error) {
+                console.error("Error fetching sender profile:", error);
+            } finally {
+                setIsLoadingProfile(false);
+            }
+        };
+
+        fetchSenderProfile();
+    }, []);
 
     const handleAddSlot = () => {
         if (deliverySlots.length < 3) {
-            setDeliverySlots([...deliverySlots, { date: "", timeSlot: "" }]);
+            setDeliverySlots([...deliverySlots, { startTime: "", endTime: "" }]);
         }
     };
 
@@ -83,21 +118,91 @@ export default function DeliveryFormPage() {
         setDeliverySlots(newSlots);
     };
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setItemImage(e.target.files[0]);
         }
     };
 
-    const handleSubmit = () => {
-        // Validation
-        if (!customerName || !phone || !category || !itemName) {
+    const fileToBase64 = (file: File) =>
+        new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                resolve(reader.result as string);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+
+    const handleSubmit = async () => {
+        if (!customerName || !phone || !category || !itemName || !address || !area || !pincode) {
             alert("Please fill in all required fields");
             return;
         }
-        // Submit logic
-        alert("Delivery request sent to customer!");
-        router.push("/sender_page/dashboard");
+
+        setSubmitError("");
+        setIsSubmitting(true);
+
+        try {
+            const imageBase64 = itemImage ? await fileToBase64(itemImage) : null;
+
+            const response = await fetch("/api/orders", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    customerName,
+                    phone,
+                    email,
+                    pincode,
+                    address,
+                    area,
+                    category,
+                    itemName,
+                    description,
+                    quantity,
+                    isFragile,
+                    pickupLat,
+                    pickupLng,
+                    imageBase64,
+                    deliverySlots,
+                }),
+            });
+
+            const data = await response.json().catch(() => null);
+
+            if (!response.ok) {
+                throw new Error(data?.error || "Failed to create order");
+            }
+
+            alert("Delivery request stored successfully!");
+            router.push("/sender_page/dashboard");
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : "Failed to submit delivery request";
+            setSubmitError(message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleGetLocation = () => {
+        if (!navigator.geolocation) {
+            setLocStatus("Geolocation not supported in this browser.");
+            return;
+        }
+        setLocStatus("Requesting location...");
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const { latitude, longitude } = pos.coords;
+                setPickupLat(latitude.toFixed(6));
+                setPickupLng(longitude.toFixed(6));
+                setLocStatus("Location captured.");
+            },
+            (err) => {
+                setLocStatus(`Location denied: ${err.message}`);
+            },
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+        );
     };
 
     const handleCancel = () => {
@@ -156,20 +261,61 @@ export default function DeliveryFormPage() {
                                     <label className="block text-sm text-gray-500 mb-1.5">Shop Name</label>
                                     <input
                                         type="text"
-                                        value="TechMart Electronics"
+                                        value={isLoadingProfile ? "Loading..." : shopName || "Unavailable"}
                                         disabled
-                                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-500"
+                                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm text-gray-500 mb-1.5">Contact</label>
                                     <input
                                         type="text"
-                                        value="+91 98765 43210"
+                                        value={isLoadingProfile ? "Loading..." : shopContact || "Unavailable"}
                                         disabled
-                                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-500"
+                                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700"
                                     />
                                 </div>
+                            </div>
+
+                            <div className="mt-4 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                                        <MapPinIcon className="w-4 h-4 text-orange-500" />
+                                        <span>Pickup Location (auto-detect)</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleGetLocation}
+                                        className="px-3 py-2 text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 rounded-lg"
+                                    >
+                                        Get My Location
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs text-gray-500 mb-1">Latitude</label>
+                                        <input
+                                            type="text"
+                                            value={pickupLat}
+                                            readOnly
+                                            placeholder="--"
+                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-gray-500 mb-1">Longitude</label>
+                                        <input
+                                            type="text"
+                                            value={pickupLng}
+                                            readOnly
+                                            placeholder="--"
+                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700"
+                                        />
+                                    </div>
+                                </div>
+                                {locStatus && (
+                                    <p className="text-xs text-gray-600">{locStatus}</p>
+                                )}
                             </div>
                         </div>
 
@@ -339,69 +485,37 @@ export default function DeliveryFormPage() {
                             </div>
                         </div>
 
-                        {/* Proposed Delivery Slots */}
+                        {/* Shop Working Hours */}
                         <div className="bg-white rounded-xl border border-gray-100 p-5">
-                            <h2 className="text-base font-bold text-gray-900 mb-4">Proposed Delivery Slots</h2>
-                            <div className="space-y-3">
-                                {deliverySlots.map((slot, index) => (
-                                    <div key={index} className="flex items-center gap-3">
+                            <h2 className="text-base font-bold text-gray-900 mb-4">Shop Working Hours</h2>
+                            {isLoadingProfile ? (
+                                <p className="text-sm text-gray-500">Loading shop hours...</p>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-200">
                                         <div>
-                                            <label className="block text-sm text-gray-600 mb-1.5">Date</label>
-                                            <div className="relative">
-                                                <input
-                                                    type="date"
-                                                    value={slot.date}
-                                                    onChange={(e) => handleSlotChange(index, 'date', e.target.value)}
-                                                    className="w-40 px-3 py-2.5 bg-gray-800 text-white border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                                />
+                                            <label className="block text-sm text-gray-600 mb-2">Shop Opening Time</label>
+                                            <div className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 font-semibold">
+                                                {shopStartHour !== null ? `${String(shopStartHour).padStart(2, '0')}:00` : "--:--"}
                                             </div>
                                         </div>
-                                        <div className="flex-1">
-                                            <label className="block text-sm text-gray-600 mb-1.5">Time Slot</label>
-                                            <select
-                                                value={slot.timeSlot}
-                                                onChange={(e) => handleSlotChange(index, 'timeSlot', e.target.value)}
-                                                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
-                                            >
-                                                <option value="">Select time</option>
-                                                {timeSlots.map((time) => (
-                                                    <option key={time} value={time}>{time}</option>
-                                                ))}
-                                            </select>
+                                        <div>
+                                            <label className="block text-sm text-gray-600 mb-2">Shop Closing Time</label>
+                                            <div className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 font-semibold">
+                                                {shopEndHour !== null ? `${String(shopEndHour).padStart(2, '0')}:00` : "--:--"}
+                                            </div>
                                         </div>
-                                        {index === deliverySlots.length - 1 && deliverySlots.length < 3 ? (
-                                            <button
-                                                type="button"
-                                                onClick={handleAddSlot}
-                                                className="mt-6 w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200 transition"
-                                            >
-                                                <PlusIcon className="w-5 h-5 text-gray-600" />
-                                            </button>
-                                        ) : deliverySlots.length > 1 ? (
-                                            <button
-                                                type="button"
-                                                onClick={() => handleRemoveSlot(index)}
-                                                className="mt-6 w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center hover:bg-red-100 transition"
-                                            >
-                                                <XMarkIcon className="w-5 h-5 text-red-500" />
-                                            </button>
-                                        ) : (
-                                            <button
-                                                type="button"
-                                                onClick={handleAddSlot}
-                                                className="mt-6 w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200 transition"
-                                            >
-                                                <PlusIcon className="w-5 h-5 text-gray-600" />
-                                            </button>
-                                        )}
                                     </div>
-                                ))}
-                                <p className="text-xs text-orange-400 mt-2">Add 1-3 delivery slots for the customer to choose from</p>
-                            </div>
+                                    <p className="text-xs text-gray-500">Your shop operates within these hours</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Action Buttons */}
                         <div className="flex justify-end gap-3 pt-2">
+                            {submitError && (
+                                <p className="text-sm text-red-500 pr-3">{submitError}</p>
+                            )}
                             <button
                                 type="button"
                                 onClick={handleCancel}
@@ -412,9 +526,10 @@ export default function DeliveryFormPage() {
                             <button
                                 type="button"
                                 onClick={handleSubmit}
-                                className="px-5 py-2.5 bg-orange-500 rounded-lg text-sm font-medium text-white hover:bg-orange-600 transition"
+                                disabled={isSubmitting}
+                                className="px-5 py-2.5 bg-orange-500 rounded-lg text-sm font-medium text-white hover:bg-orange-600 transition disabled:opacity-70 disabled:cursor-not-allowed"
                             >
-                                Send to Customer
+                                {isSubmitting ? "Saving..." : "Send to Customer"}
                             </button>
                         </div>
                     </div>

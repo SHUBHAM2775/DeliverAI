@@ -11,11 +11,15 @@ export interface Order extends Document {
   agentId?: Types.ObjectId;
   commodityName: string;
   commodityCategory?: string;
+  description?: string;
+  quantity?: string;
   isFragile: boolean;
   imageUrl?: string;
   deliveryAddress: string;
   area: string;
   pincode: string;
+  workingStartTime?: string;
+  workingEndTime?: string;
   geoLocation?: GeoLocation;
   orderStatus: "CREATED" | "CONFIRMED" | "DELIVERED" | "FAILED";
   deliveryDate?: Date;
@@ -40,11 +44,15 @@ const orderSchema = new Schema<Order>(
     agentId: { type: Schema.Types.ObjectId, ref: "User" },
     commodityName: { type: String, required: true },
     commodityCategory: { type: String },
+    description: { type: String },
+    quantity: { type: String },
     isFragile: { type: Boolean, default: false },
     imageUrl: { type: String },
     deliveryAddress: { type: String, required: true },
     area: { type: String, required: true },
     pincode: { type: String, required: true },
+    workingStartTime: { type: String },
+    workingEndTime: { type: String },
     geoLocation: { type: geoLocationSchema },
     orderStatus: {
       type: String,

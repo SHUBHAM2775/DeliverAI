@@ -3,6 +3,7 @@ import { Schema, model, models, Document } from "mongoose";
 export interface User extends Document {
   role: "ADMIN" | "SENDER" | "RECEIVER" | "AGENT";
   name: string;
+  email?: string;
   phone?: string;
   status: "ACTIVE" | "SUSPENDED";
   createdAt?: Date;
@@ -17,6 +18,7 @@ const userSchema = new Schema<User>(
       required: true,
     },
     name: { type: String, required: true },
+    email: { type: String, unique: true, sparse: true },
     phone: { type: String },
     status: { type: String, enum: ["ACTIVE", "SUSPENDED"], default: "ACTIVE" },
     createdAt: { type: Date },

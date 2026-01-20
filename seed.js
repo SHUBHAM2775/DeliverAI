@@ -55,9 +55,9 @@ async function seed() {
     },
     {
       role: "SENDER",
-      name: "Samuel Sender",
+      name: "TechMart Electronics",
       email: "sender@example.com",
-      phone: "+15550001",
+      phone: "+91 98765 43210",
     },
     {
       role: "RECEIVER",
@@ -106,10 +106,12 @@ async function seed() {
 
   await SenderProfile.create({
     userId: senderUser._id,
-    organizationName: "Sender Corp",
-    defaultPickupAddress: "12 Market St, Downtown",
-    totalOrders: 12,
-    failedDeliveryRate: 0.08,
+    organizationName: "TechMart Electronics",
+    defaultPickupAddress: "42 Tech Plaza, Mumbai, Maharashtra 400001",
+    startHour: 10,
+    endHour: 22,
+    totalOrders: 156,
+    failedDeliveryRate: 0.05,
   });
 
   const slots = await DeliverySlot.create([
@@ -388,8 +390,7 @@ seed()
     console.log("Seeding completed successfully");
     return mongoose.connection.close();
   })
-  .catch((err) => {
-    console.error("Seeding failed", err);
-    mongoose.connection.close();
+  .catch((error) => {
+    console.error("Seeding failed:", error);
     process.exit(1);
   });
