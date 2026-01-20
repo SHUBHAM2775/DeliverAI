@@ -11,6 +11,7 @@ export interface SlotPrediction extends Document {
   predictedSuccessProbability?: number;
   store_id?: string;
   pickup_availability_window?: string;
+  store_location?: DeliveryLocation;
   seller_allowed_time_range?: string;
   parcel_category?: string;
   delivery_location?: DeliveryLocation;
@@ -38,6 +39,7 @@ const slotPredictionSchema = new Schema<SlotPrediction>(
     seller_allowed_time_range: { type: String },
     parcel_category: { type: String },
     delivery_location: { type: deliveryLocationSchema },
+    store_location: { type: deliveryLocationSchema },
   },
   { collection: "slot_predictions" },
 );

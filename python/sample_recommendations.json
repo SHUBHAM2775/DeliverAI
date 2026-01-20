@@ -1,0 +1,322 @@
+[
+  {
+    "date": "2026-01-20",
+    "day_name": "Tuesday",
+    "slot_name": "Morning",
+    "time_hour": 9,
+    "success_probability": 0.8465999960899353,
+    "day_offset": 0
+  },
+  {
+    "date": "2026-01-21",
+    "day_name": "Wednesday",
+    "slot_name": "Morning",
+    "time_hour": 9,
+    "success_probability": 0.8465999960899353,
+    "day_offset": 1
+  },
+  {
+    "date": "2026-01-27",
+    "day_name": "Tuesday",
+    "slot_name": "Morning",
+    "time_hour": 9,
+    "success_probability": 0.8465999960899353,
+    "day_offset": 7
+  },
+  {
+    "date": "2026-01-28",
+    "day_name": "Wednesday",
+    "slot_name": "Morning",
+    "time_hour": 9,
+    "success_probability": 0.8465999960899353,
+    "day_offset": 8
+  },
+  {
+    "date": "2026-01-26",
+    "day_name": "Monday",
+    "slot_name": "Morning",
+    "time_hour": 9,
+    "success_probability": 0.8464000225067139,
+    "day_offset": 6
+  },
+  {
+    "date": "2026-01-22",
+    "day_name": "Thursday",
+    "slot_name": "Morning",
+    "time_hour": 9,
+    "success_probability": 0.8461999893188477,
+    "day_offset": 2
+  },
+  {
+    "date": "2026-01-23",
+    "day_name": "Friday",
+    "slot_name": "Morning",
+    "time_hour": 9,
+    "success_probability": 0.8461999893188477,
+    "day_offset": 3
+  },
+  {
+    "date": "2026-01-24",
+    "day_name": "Saturday",
+    "slot_name": "Morning",
+    "time_hour": 9,
+    "success_probability": 0.8461999893188477,
+    "day_offset": 4
+  },
+  {
+    "date": "2026-01-25",
+    "day_name": "Sunday",
+    "slot_name": "Morning",
+    "time_hour": 9,
+    "success_probability": 0.8461999893188477,
+    "day_offset": 5
+  },
+  {
+    "date": "2026-01-29",
+    "day_name": "Thursday",
+    "slot_name": "Morning",
+    "time_hour": 9,
+    "success_probability": 0.8461999893188477,
+    "day_offset": 9
+  },
+  {
+    "date": "2026-01-20",
+    "day_name": "Tuesday",
+    "slot_name": "Midday",
+    "time_hour": 12,
+    "success_probability": 0.7742000222206116,
+    "day_offset": 0
+  },
+  {
+    "date": "2026-01-21",
+    "day_name": "Wednesday",
+    "slot_name": "Midday",
+    "time_hour": 12,
+    "success_probability": 0.7742000222206116,
+    "day_offset": 1
+  },
+  {
+    "date": "2026-01-27",
+    "day_name": "Tuesday",
+    "slot_name": "Midday",
+    "time_hour": 12,
+    "success_probability": 0.7742000222206116,
+    "day_offset": 7
+  },
+  {
+    "date": "2026-01-28",
+    "day_name": "Wednesday",
+    "slot_name": "Midday",
+    "time_hour": 12,
+    "success_probability": 0.7742000222206116,
+    "day_offset": 8
+  },
+  {
+    "date": "2026-01-26",
+    "day_name": "Monday",
+    "slot_name": "Midday",
+    "time_hour": 12,
+    "success_probability": 0.7739999890327454,
+    "day_offset": 6
+  },
+  {
+    "date": "2026-01-22",
+    "day_name": "Thursday",
+    "slot_name": "Midday",
+    "time_hour": 12,
+    "success_probability": 0.7738000154495239,
+    "day_offset": 2
+  },
+  {
+    "date": "2026-01-23",
+    "day_name": "Friday",
+    "slot_name": "Midday",
+    "time_hour": 12,
+    "success_probability": 0.7738000154495239,
+    "day_offset": 3
+  },
+  {
+    "date": "2026-01-24",
+    "day_name": "Saturday",
+    "slot_name": "Midday",
+    "time_hour": 12,
+    "success_probability": 0.7738000154495239,
+    "day_offset": 4
+  },
+  {
+    "date": "2026-01-25",
+    "day_name": "Sunday",
+    "slot_name": "Midday",
+    "time_hour": 12,
+    "success_probability": 0.7738000154495239,
+    "day_offset": 5
+  },
+  {
+    "date": "2026-01-29",
+    "day_name": "Thursday",
+    "slot_name": "Midday",
+    "time_hour": 12,
+    "success_probability": 0.7738000154495239,
+    "day_offset": 9
+  },
+  {
+    "date": "2026-01-20",
+    "day_name": "Tuesday",
+    "slot_name": "Afternoon",
+    "time_hour": 15,
+    "success_probability": 0.7638999819755554,
+    "day_offset": 0
+  },
+  {
+    "date": "2026-01-21",
+    "day_name": "Wednesday",
+    "slot_name": "Afternoon",
+    "time_hour": 15,
+    "success_probability": 0.7638999819755554,
+    "day_offset": 1
+  },
+  {
+    "date": "2026-01-27",
+    "day_name": "Tuesday",
+    "slot_name": "Afternoon",
+    "time_hour": 15,
+    "success_probability": 0.7638999819755554,
+    "day_offset": 7
+  },
+  {
+    "date": "2026-01-28",
+    "day_name": "Wednesday",
+    "slot_name": "Afternoon",
+    "time_hour": 15,
+    "success_probability": 0.7638999819755554,
+    "day_offset": 8
+  },
+  {
+    "date": "2026-01-26",
+    "day_name": "Monday",
+    "slot_name": "Afternoon",
+    "time_hour": 15,
+    "success_probability": 0.763700008392334,
+    "day_offset": 6
+  },
+  {
+    "date": "2026-01-22",
+    "day_name": "Thursday",
+    "slot_name": "Afternoon",
+    "time_hour": 15,
+    "success_probability": 0.7635999917984009,
+    "day_offset": 2
+  },
+  {
+    "date": "2026-01-23",
+    "day_name": "Friday",
+    "slot_name": "Afternoon",
+    "time_hour": 15,
+    "success_probability": 0.7635999917984009,
+    "day_offset": 3
+  },
+  {
+    "date": "2026-01-24",
+    "day_name": "Saturday",
+    "slot_name": "Afternoon",
+    "time_hour": 15,
+    "success_probability": 0.7635999917984009,
+    "day_offset": 4
+  },
+  {
+    "date": "2026-01-25",
+    "day_name": "Sunday",
+    "slot_name": "Afternoon",
+    "time_hour": 15,
+    "success_probability": 0.7635999917984009,
+    "day_offset": 5
+  },
+  {
+    "date": "2026-01-29",
+    "day_name": "Thursday",
+    "slot_name": "Afternoon",
+    "time_hour": 15,
+    "success_probability": 0.7635999917984009,
+    "day_offset": 9
+  },
+  {
+    "date": "2026-01-20",
+    "day_name": "Tuesday",
+    "slot_name": "Evening",
+    "time_hour": 18,
+    "success_probability": 0.7247999906539917,
+    "day_offset": 0
+  },
+  {
+    "date": "2026-01-21",
+    "day_name": "Wednesday",
+    "slot_name": "Evening",
+    "time_hour": 18,
+    "success_probability": 0.7247999906539917,
+    "day_offset": 1
+  },
+  {
+    "date": "2026-01-26",
+    "day_name": "Monday",
+    "slot_name": "Evening",
+    "time_hour": 18,
+    "success_probability": 0.7247999906539917,
+    "day_offset": 6
+  },
+  {
+    "date": "2026-01-27",
+    "day_name": "Tuesday",
+    "slot_name": "Evening",
+    "time_hour": 18,
+    "success_probability": 0.7247999906539917,
+    "day_offset": 7
+  },
+  {
+    "date": "2026-01-28",
+    "day_name": "Wednesday",
+    "slot_name": "Evening",
+    "time_hour": 18,
+    "success_probability": 0.7247999906539917,
+    "day_offset": 8
+  },
+  {
+    "date": "2026-01-22",
+    "day_name": "Thursday",
+    "slot_name": "Evening",
+    "time_hour": 18,
+    "success_probability": 0.724399983882904,
+    "day_offset": 2
+  },
+  {
+    "date": "2026-01-23",
+    "day_name": "Friday",
+    "slot_name": "Evening",
+    "time_hour": 18,
+    "success_probability": 0.724399983882904,
+    "day_offset": 3
+  },
+  {
+    "date": "2026-01-24",
+    "day_name": "Saturday",
+    "slot_name": "Evening",
+    "time_hour": 18,
+    "success_probability": 0.724399983882904,
+    "day_offset": 4
+  },
+  {
+    "date": "2026-01-25",
+    "day_name": "Sunday",
+    "slot_name": "Evening",
+    "time_hour": 18,
+    "success_probability": 0.724399983882904,
+    "day_offset": 5
+  },
+  {
+    "date": "2026-01-29",
+    "day_name": "Thursday",
+    "slot_name": "Evening",
+    "time_hour": 18,
+    "success_probability": 0.724399983882904,
+    "day_offset": 9
+  }
+]
