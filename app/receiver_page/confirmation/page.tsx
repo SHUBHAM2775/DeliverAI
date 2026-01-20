@@ -96,6 +96,32 @@ export default function ConfirmationPage() {
         router.push("/receiver_page/notifications");
     };
 
+    const formatSlotTime = (slot: string): string => {
+        // Handle custom slots like "custom-17:00"
+        if (slot.startsWith("custom-")) {
+            const time = slot.replace("custom-", "").replace(/:/g, "");
+            const hour = parseInt(time);
+            if (hour === 12) return "12 PM";
+            if (hour === 0) return "12 AM";
+            return hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
+        }
+        
+        // Handle time range slots like "10-11" or "8:00 - 10:00 AM"
+        if (slot.includes("-")) {
+            const parts = slot.split("-").map(p => p.trim());
+            const formatHour = (hourStr: string): string => {
+                const hour = parseInt(hourStr.replace(/[^0-9]/g, ""));
+                if (isNaN(hour)) return hourStr;
+                if (hour === 12) return "12 PM";
+                if (hour === 0) return "12 AM";
+                return hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
+            };
+            return `${formatHour(parts[0])} - ${formatHour(parts[1])}`;
+        }
+        
+        return slot;
+    };
+
     return (
         <div className="flex-1 overflow-y-auto bg-gray-50">
             <div className="p-8 min-h-full flex flex-col">
@@ -141,7 +167,7 @@ export default function ConfirmationPage() {
                                 <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
                                     <div className="flex items-center justify-center gap-3 mb-2">
                                         <CalendarIcon className="w-6 h-6 text-indigo-600" />
-                                        <h3 className="text-2xl font-bold text-gray-900">{selectedSlot}</h3>
+                                        <h3 className="text-2xl font-bold text-gray-900">{formatSlotTime(selectedSlot)}</h3>
                                     </div>
                                     <p className="text-center text-gray-600 text-sm">Date: {selectedDate}</p>
                                 </div>

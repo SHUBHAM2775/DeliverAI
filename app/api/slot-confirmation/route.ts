@@ -66,6 +66,17 @@ export async function POST(request: Request) {
 
     const confirmation = await SlotConfirmationModel.create(slotData);
 
+    // Update the Order with the confirmed slot information
+    if (Types.ObjectId.isValid(orderId)) {
+      const updateData: any = {
+        orderStatus: 'CONFIRMED',
+        deliveryDate: new Date(date),
+        customSlotTime: slot,
+      };
+      
+      await OrderModel.findByIdAndUpdate(orderId, updateData);
+    }
+
     return NextResponse.json(
       {
         success: true,
@@ -87,8 +98,13 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get('orderId');
 
-    if (!orderId) {
-      return NextResponse.json({ error: 'orderId is required' }, { status: 400 });
+    if (!orderId || orderId === 'undefined' || orderId === 'null') {
+      return NextResponse.json({ error: 'Valid orderId is required' }, { status: 400 });
+    }
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return NextResponse.json({ error: 'Invalid orderId format' }, { status: 400 });
     }
 
     const confirmation = await SlotConfirmationModel.findOne({ orderId })
