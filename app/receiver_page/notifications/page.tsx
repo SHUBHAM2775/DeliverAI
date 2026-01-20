@@ -57,33 +57,30 @@ export default function NotificationsPage() {
                 <div className="flex gap-3 mb-8">
                     <button
                         onClick={() => setActiveTab("reminder")}
-                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${
-                            activeTab === "reminder"
+                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${activeTab === "reminder"
                                 ? "bg-indigo-600 text-white"
                                 : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                        }`}
+                            }`}
                     >
                         <BellIcon className="w-4 h-4" />
                         Reminder
                     </button>
                     <button
                         onClick={() => setActiveTab("reschedule")}
-                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${
-                            activeTab === "reschedule"
+                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${activeTab === "reschedule"
                                 ? "bg-indigo-600 text-white"
                                 : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                        }`}
+                            }`}
                     >
                         <CalendarIcon className="w-4 h-4" />
                         Reschedule
                     </button>
                     <button
                         onClick={() => setActiveTab("feedback")}
-                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${
-                            activeTab === "feedback"
+                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${activeTab === "feedback"
                                 ? "bg-indigo-600 text-white"
                                 : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                        }`}
+                            }`}
                     >
                         <ChatBubbleBottomCenterTextIcon className="w-4 h-4" />
                         Feedback
@@ -181,16 +178,14 @@ export default function NotificationsPage() {
                                             <div
                                                 key={idx}
                                                 onClick={() => setSelectedSlot(slot.time)}
-                                                className={`bg-green-200 rounded-lg p-2.5 cursor-pointer transition-all hover:scale-105 relative ${
-                                                    selectedSlot === slot.time ? 'ring-4 ring-indigo-500 ring-offset-2' : ''
-                                                }`}
+                                                className={`bg-green-200 rounded-lg p-2.5 cursor-pointer transition-all hover:scale-105 relative ${selectedSlot === slot.time ? 'ring-4 ring-indigo-500 ring-offset-2' : ''
+                                                    }`}
                                             >
                                                 {slot.badge && (
-                                                    <div className={`absolute -top-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[8px] font-medium flex items-center gap-0.5 ${
-                                                        slot.badge === "AI Pick" 
-                                                            ? "bg-gray-900 text-white" 
+                                                    <div className={`absolute -top-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[8px] font-medium flex items-center gap-0.5 ${slot.badge === "AI Pick"
+                                                            ? "bg-gray-900 text-white"
                                                             : "bg-white text-gray-700 border border-gray-200"
-                                                    }`}>
+                                                        }`}>
                                                         {slot.badge === "AI Pick" ? (
                                                             <SparklesIcon className="w-2.5 h-2.5" />
                                                         ) : (
