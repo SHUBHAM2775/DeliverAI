@@ -11,7 +11,6 @@ import {
     PaperAirplaneIcon,
     ExclamationTriangleIcon,
     ChartBarIcon,
-    Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 
 const menuItems = [
@@ -22,7 +21,6 @@ const menuItems = [
     { name: "Pre-Dispatch", href: "/admin_page/pre-dispatch", icon: PaperAirplaneIcon },
     { name: "Alerts", href: "/admin_page/alerts", icon: ExclamationTriangleIcon },
     { name: "Analytics", href: "/admin_page/analytics", icon: ChartBarIcon },
-    { name: "Settings", href: "/admin_page/settings", icon: Cog6ToothIcon },
 ];
 
 export default function Sidebar() {

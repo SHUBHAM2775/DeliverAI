@@ -1,202 +1,154 @@
 "use client";
 
 import Header from "@/components/Header";
+import { useEffect, useState } from "react";
 import {
     BellAlertIcon,
     ExclamationTriangleIcon,
     InformationCircleIcon,
-    MapPinIcon,
-    XMarkIcon,
 } from "@heroicons/react/24/solid";
-import { CheckCircleIcon } from "@heroicons/react/24/outline";
-
-type AlertSeverity = "critical" | "warning" | "info";
 
 interface AlertItem {
-    id: string;
-    title: string;
-    severity: AlertSeverity;
+    riskId: string;
+    orderId: string;
+    riskType: string;
+    riskLevel: string;
     description: string;
-    location: string;
-    timeAgo: string;
-    unread?: boolean;
+    area: string;
+    createdAt: string;
 }
 
-const summaryCards = [
-    { label: "Total Alerts", value: 7, tone: "bg-[#DBEAFE]", text: "text-blue-600", icon: BellAlertIcon },
-    { label: "Critical", value: 2, tone: "bg-[#FEE2E2]", text: "text-rose-600", icon: ExclamationTriangleIcon },
-    { label: "Warnings", value: 3, tone: "bg-[#FEF3C7]", text: "text-amber-600", icon: ExclamationTriangleIcon },
-    { label: "Unread", value: 3, tone: "bg-[#F3E8FF]", text: "text-purple-600", icon: InformationCircleIcon },
-];
+interface AlertSummary {
+    high: number;
+    medium: number;
+    low: number;
+}
 
-const alerts: AlertItem[] = [
-    {
-        id: "major-traffic",
-        title: "Major Traffic Disruption",
-        severity: "critical",
-        description: "Highway I-95 closed due to accident. Expected delay of 45+ minutes for Downtown deliveries.",
-        location: "Downtown · Midtown",
-        timeAgo: "5 min ago",
-        unread: true,
+const severityMapping: Record<string, { label: string; className: string; icon: string }> = {
+    HIGH: {
+        label: "Critical",
+        className: "bg-rose-50 border border-rose-200/80",
+        icon: "🔴",
     },
-    {
-        id: "rain",
-        title: "Heavy Rain Expected",
-        severity: "warning",
-        description: "Weather forecast predicts heavy rain between 4-7 PM. Consider rescheduling outdoor deliveries.",
-        location: "All Areas",
-        timeAgo: "15 min ago",
-        unread: true,
+    MEDIUM: {
+        label: "Warning",
+        className: "bg-amber-50 border border-amber-200/80",
+        icon: "🟡",
     },
-    {
-        id: "agent-delay",
-        title: "Agent Delay Reported",
-        severity: "warning",
-        description: "Agent A-034 (Sarah Chen) running 25 minutes behind schedule. 3 deliveries affected.",
-        location: "All Areas",
-        timeAgo: "20 min ago",
-        unread: true,
+    LOW: {
+        label: "Info",
+        className: "bg-blue-50 border border-blue-200/80",
+        icon: "🔵",
     },
-    {
-        id: "slot-overbook",
-        title: "Slot Overbooking Alert",
-        severity: "critical",
-        description: "5-7 PM slot has exceeded capacity by 15%. AI recommends redistributing 8 orders to adjacent slots.",
-        location: "Downtown",
-        timeAgo: "30 min ago",
-    },
-    {
-        id: "road-construction",
-        title: "Road Construction Notice",
-        severity: "info",
-        description: "Lane closures on Main Street through Friday. Minor delays expected.",
-        location: "Uptown",
-        timeAgo: "1 hour ago",
-    },
-    {
-        id: "new-agent",
-        title: "New Agent Onboarded",
-        severity: "info",
-        description: "Agent A-145 (Tom Anderson) has completed training and is now available for assignments.",
-        location: "All Areas",
-        timeAgo: "2 hours ago",
-    },
-    {
-        id: "low-confirm",
-        title: "Low Confirmation Rate",
-        severity: "warning",
-        description: "7-9 PM slot showing 65% confirmation rate. AI suggests proactive outreach.",
-        location: "All Areas",
-        timeAgo: "3 hours ago",
-    },
-];
-
-const severityStyles: Record<AlertSeverity, string> = {
-    critical: "bg-rose-50 border border-rose-200/80",
-    warning: "bg-amber-50 border border-amber-200/80",
-    info: "bg-blue-50 border border-blue-200/80",
 };
 
-const severityBadge: Record<AlertSeverity, { label: string; className: string; Icon: typeof ExclamationTriangleIcon }>
-    = {
-        critical: {
-            label: "critical",
-            className: "bg-rose-100 text-rose-700 ring-1 ring-rose-200",
-            Icon: ExclamationTriangleIcon,
-        },
-        warning: {
-            label: "warning",
-            className: "bg-amber-100 text-amber-700 ring-1 ring-amber-200",
-            Icon: ExclamationTriangleIcon,
-        },
-        info: {
-            label: "info",
-            className: "bg-blue-100 text-blue-700 ring-1 ring-blue-200",
-            Icon: InformationCircleIcon,
-        },
-    };
-
 export default function AlertsPage() {
+    const [alerts, setAlerts] = useState<AlertItem[]>([]);
+    const [summary, setSummary] = useState<AlertSummary>({ high: 0, medium: 0, low: 0 });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchAlerts = async () => {
+            try {
+                const response = await fetch("/api/admin_apis/alerts");
+                if (!response.ok) throw new Error("Failed to fetch alerts");
+                const data = await response.json();
+                setAlerts(data?.data || []);
+                setSummary(data?.summary || { high: 0, medium: 0, low: 0 });
+            } catch (err: any) {
+                setError(err?.message || "Unable to load alerts");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchAlerts();
+    }, []);
+
+    const summaryCards = [
+        { label: "Total Alerts", value: summary.high + summary.medium + summary.low, tone: "bg-[#DBEAFE]", text: "text-blue-600" },
+        { label: "Critical", value: summary.high, tone: "bg-[#FEE2E2]", text: "text-rose-600" },
+        { label: "Warnings", value: summary.medium, tone: "bg-[#FEF3C7]", text: "text-amber-600" },
+        { label: "Info", value: summary.low, tone: "bg-[#F3E8FF]", text: "text-purple-600" },
+    ];
+
+    if (loading) {
+        return (
+            <div className="flex-1 overflow-y-auto">
+                <div className="p-8 bg-gray-50 min-h-full">
+                    <Header title="Smart Alerts & Exceptions" />
+                    <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-600">
+                        Loading alerts...
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex-1 overflow-y-auto">
+                <div className="p-8 bg-gray-50 min-h-full">
+                    <Header title="Smart Alerts & Exceptions" />
+                    <div className="bg-white rounded-xl border border-red-200 p-6 text-center text-red-600">
+                        {error}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex-1 overflow-y-auto">
-            <div className="p-8 min-h-full">
-                <Header title="Alerts" />
-                <div className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                        {summaryCards.map((card) => {
-                            const Icon = card.icon;
+            <div className="p-8 bg-gray-50 min-h-full">
+                <Header title="Smart Alerts & Exceptions" />
+
+                {/* Summary Cards */}
+                <div className="grid grid-cols-4 gap-6 mb-8">
+                    {summaryCards.map((card, idx) => (
+                        <div key={idx} className={`${card.tone} rounded-xl p-5`}>
+                            <p className="text-gray-600 text-sm font-medium">{card.label}</p>
+                            <p className={`text-4xl font-bold mt-2 ${card.text}`}>{card.value}</p>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Alerts List */}
+                <div className="space-y-4">
+                    {alerts.length > 0 ? (
+                        alerts.map((alert) => {
+                            const severity = severityMapping[alert.riskLevel] || severityMapping.LOW;
+                            const timeAgo = new Date(alert.createdAt);
+                            const diffMs = Date.now() - timeAgo.getTime();
+                            const diffMins = Math.floor(diffMs / 60000);
+                            const timeText = diffMins < 60 ? `${diffMins} min ago` : `${Math.floor(diffMins / 60)} hours ago`;
+
                             return (
-                                <div
-                                    key={card.label}
-                                    className={`${card.tone} rounded-xl p-5 flex items-start gap-3 shadow-sm`}
-                                >
-                                    <div className={`${card.text} bg-white/70 rounded-lg p-2 shadow-inner`}>{<Icon className="h-6 w-6" />}</div>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-600">{card.label}</p>
-                                        <p className="text-3xl font-bold text-gray-900 mt-1">{card.value}</p>
+                                <div key={alert.riskId} className={`${severity.className} rounded-lg p-6`}>
+                                    <div className="flex items-start gap-4">
+                                        <div className="text-2xl mt-1">{severity.icon}</div>
+                                        <div className="flex-1">
+                                            <div className="flex items-start justify-between mb-2">
+                                                <div>
+                                                    <h3 className="font-bold text-gray-900">{alert.riskType}</h3>
+                                                    <p className="text-sm text-gray-600">Order: {alert.orderId}</p>
+                                                </div>
+                                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-opacity-20 bg-gray-600">
+                                                    {timeText}
+                                                </span>
+                                            </div>
+                                            <p className="text-gray-700 mb-2">{alert.description}</p>
+                                            <p className="text-sm text-gray-600">📍 {alert.area}</p>
+                                        </div>
                                     </div>
                                 </div>
                             );
-                        })}
-                    </div>
-
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                            <div>
-                                <h2 className="text-lg font-semibold text-gray-900">All Alerts</h2>
-                                <p className="text-sm text-gray-600">Monitor and resolve delivery incidents</p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
-                                    Mark all as read
-                                </button>
-                            </div>
+                        })
+                    ) : (
+                        <div className="bg-white rounded-lg p-8 text-center text-gray-600 border border-gray-200">
+                            No active alerts
                         </div>
-
-                        <div className="divide-y divide-gray-100">
-                            {alerts.map((alert) => {
-                                const badge = severityBadge[alert.severity];
-                                const Icon = badge.Icon;
-                                return (
-                                    <div
-                                        key={alert.id}
-                                        className={`px-6 py-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between ${severityStyles[alert.severity]}`}
-                                    >
-                                        <div className="flex items-start gap-4">
-                                            <div className="h-11 w-11 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-700">
-                                                <Icon className="h-6 w-6" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <p className="text-base font-semibold text-gray-900">{alert.title}</p>
-                                                    <span className={`${badge.className} px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex items-center gap-1`}>
-                                                        <Icon className="h-4 w-4" />
-                                                        {badge.label}
-                                                    </span>
-                                                    {alert.unread && <span className="h-2 w-2 rounded-full bg-blue-600" aria-hidden />}
-                                                </div>
-                                                <p className="text-sm text-gray-700 max-w-3xl leading-relaxed">{alert.description}</p>
-                                                <div className="flex items-center gap-4 text-sm text-gray-600">
-                                                    <span className="inline-flex items-center gap-1"> <MapPinIcon className="h-4 w-4" /> {alert.location}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-3 self-start md:self-auto">
-                                            <span className="text-sm text-gray-500 whitespace-nowrap">{alert.timeAgo}</span>
-                                            <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-800 bg-white/80 hover:bg-white rounded-lg border border-gray-200 shadow-sm transition">
-                                                <CheckCircleIcon className="h-5 w-5" />
-                                                Resolve
-                                            </button>
-                                            <button className="p-2 text-gray-500 hover:text-gray-800 rounded-lg hover:bg-white" aria-label="Dismiss">
-                                                <XMarkIcon className="h-5 w-5" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>

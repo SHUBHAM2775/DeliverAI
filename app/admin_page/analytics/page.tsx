@@ -1,10 +1,20 @@
 "use client";
 
 import Header from "@/components/Header";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, Easing } from "framer-motion";
 
-// Animation variants
+interface AnalyticsData {
+    overview: {
+        totalOrders: number;
+        deliveredOrders: number;
+        failedOrders: number;
+    };
+    performanceMetrics: {
+        firstAttemptSuccessRate: string;
+        averageRating: string;
+    };
+}
 const containerVariants = {
     hidden: { opacity: 0 },
     visible: {

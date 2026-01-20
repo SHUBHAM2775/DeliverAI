@@ -274,12 +274,44 @@ async function seed() {
 
   await DeliveryRisk.create([
     {
+      orderId: order1._id,
+      slotId: slots[0]._id,
+      riskType: "TRAFFIC",
+      riskLevel: "LOW",
+      description: "Minor traffic expected in Downtown area",
+      actionSuggested: "Monitor traffic conditions",
+    },
+    {
+      orderId: order2._id,
+      slotId: slots[1]._id,
+      riskType: "AGENT",
+      riskLevel: "MEDIUM",
+      description: "Agent has recent delay history on this route",
+      actionSuggested: "Assign backup agent or provide route optimization",
+    },
+    {
       orderId: order3._id,
       slotId: slots[4]._id,
       riskType: "WEATHER",
       riskLevel: "HIGH",
       description: "Heavy rain expected during evening slot",
       actionSuggested: "Consider rescheduling to earlier slot",
+    },
+    {
+      orderId: order1._id,
+      slotId: slots[2]._id,
+      riskType: "TRAFFIC",
+      riskLevel: "MEDIUM",
+      description: "Moderate congestion on delivery route",
+      actionSuggested: "Plan for 15-20 minute delay buffer",
+    },
+    {
+      orderId: order2._id,
+      slotId: slots[3]._id,
+      riskType: "WEATHER",
+      riskLevel: "HIGH",
+      description: "Severe storm warning in delivery area",
+      actionSuggested: "Postpone delivery or prepare contingency plan",
     },
   ]);
 
