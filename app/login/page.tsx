@@ -35,6 +35,14 @@ const roles = [
         href: "/receiver_page/notifications",
         color: "from-green-500 to-green-600",
     },
+    {
+        id: "driver",
+        name: "Driver",
+        description: "Manage assigned deliveries and track your daily route",
+        icon: TruckIcon,
+        href: "/driver_page",
+        color: "from-blue-400 to-blue-500",
+    },
 ];
 
 export default function LoginPage() {
@@ -77,7 +85,7 @@ export default function LoginPage() {
                         </div>
 
                         {/* Role Cards */}
-                        <div className="grid grid-cols-3 gap-6 mb-8">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
                             {roles.map((role) => {
                                 const Icon = role.icon;
                                 return (
