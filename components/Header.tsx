@@ -10,9 +10,10 @@ import {
 
 interface HeaderProps {
     title?: string;
+    role?: string;
 }
 
-export default function Header({ title = "Overview" }: HeaderProps) {
+export default function Header({ title = "Overview", role = "Admin" }: HeaderProps) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement | null>(null);
@@ -46,7 +47,7 @@ export default function Header({ title = "Overview" }: HeaderProps) {
                         onClick={() => setOpen((prev) => !prev)}
                     >
                         <div className="text-right">
-                            <p className="text-sm font-semibold text-gray-900">Admin</p>
+                            <p className="text-sm font-semibold text-gray-900">{role}</p>
                             <p className="text-xs text-gray-500">Logged in</p>
                         </div>
                         <img
