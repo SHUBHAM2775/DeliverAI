@@ -8,6 +8,14 @@ import {
 } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 
+type SlotPerformance = {
+  window: string;
+  successRate: number;
+  change: string;
+  orders: number;
+  aiPick?: boolean;
+};
+
 type OverviewMetrics = {
   totalOrdersToday: number;
   firstAttemptSuccessPercentage: string;
@@ -15,6 +23,9 @@ type OverviewMetrics = {
   avgDeliveryDelay: string;
   highRiskDeliveriesCount: number;
   activeDeliveryZones: string[];
+  activeAgents: number;
+  pendingConfirmations: number;
+  aiPredictionAccuracy: string;
 };
 
 const DEFAULT_METRICS: OverviewMetrics = {
@@ -24,11 +35,45 @@ const DEFAULT_METRICS: OverviewMetrics = {
   avgDeliveryDelay: "N/A",
   highRiskDeliveriesCount: 0,
   activeDeliveryZones: [],
+  activeAgents: 0,
+  pendingConfirmations: 0,
+  aiPredictionAccuracy: "0%",
+};
+
+const SLOT_TABS = ["Today", "24H", "7D", "1M", "All"] as const;
+
+const SLOT_DATA: Record<(typeof SLOT_TABS)[number], SlotPerformance[]> = {
+  Today: [
+    { window: "9 - 11 AM", successRate: 97, change: "↗ 2.4%", orders: 312, aiPick: true },
+    { window: "11 AM - 1 PM", successRate: 94, change: "↗ 1.8%", orders: 278, aiPick: true },
+    { window: "5 - 7 PM", successRate: 91, change: "↘ 0.5%", orders: 356 },
+  ],
+  "24H": [
+    { window: "6 - 8 AM", successRate: 92, change: "↗ 1.1%", orders: 188, aiPick: true },
+    { window: "12 - 2 PM", successRate: 89, change: "↗ 0.6%", orders: 240 },
+    { window: "8 - 10 PM", successRate: 87, change: "↘ 0.3%", orders: 205 },
+  ],
+  "7D": [
+    { window: "Mon-Fri 10-12", successRate: 95, change: "↗ 3.2%", orders: 1420, aiPick: true },
+    { window: "Sat 12-2", successRate: 90, change: "↗ 1.0%", orders: 620 },
+    { window: "Sun 4-6", successRate: 86, change: "↘ 1.4%", orders: 540 },
+  ],
+  "1M": [
+    { window: "Weekday Mornings", successRate: 93, change: "↗ 2.1%", orders: 5620, aiPick: true },
+    { window: "Weekend Evenings", successRate: 88, change: "↘ 0.7%", orders: 3010 },
+    { window: "Late Night", successRate: 84, change: "↘ 1.2%", orders: 1840 },
+  ],
+  All: [
+    { window: "Standard 9-11", successRate: 92, change: "↗ 1.0%", orders: 12890, aiPick: true },
+    { window: "Standard 11-1", successRate: 90, change: "↗ 0.4%", orders: 11740 },
+    { window: "Standard 5-7", successRate: 88, change: "↘ 0.6%", orders: 13220 },
+  ],
 };
 
 export default function OverviewPage() {
   const [metrics, setMetrics] = useState<OverviewMetrics>(DEFAULT_METRICS);
   const [loading, setLoading] = useState(true);
+  const [slotTab, setSlotTab] = useState<(typeof SLOT_TABS)[number]>(SLOT_TABS[0]);
 
   useEffect(() => {
     let isMounted = true;
@@ -362,14 +407,15 @@ export default function OverviewPage() {
 
             {/* Tabs */}
             <div className="flex gap-2 mb-4 bg-gray-100 rounded-lg p-0.5">
-              {["Today", "24H", "7D", "1M", "All"].map((tab) => (
+              {SLOT_TABS.map((tab) => (
                 <button
                   key={tab}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${
-                    tab === "Today"
+                    tab === slotTab
                       ? "bg-white text-gray-900 shadow-sm"
                       : "text-gray-500 hover:text-gray-900"
                   }`}
+                  onClick={() => setSlotTab(tab)}
                 >
                   {tab}
                 </button>
@@ -378,95 +424,42 @@ export default function OverviewPage() {
 
             {/* Slots */}
             <div className="space-y-4">
-              {/* Slot 1 */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <ClockIcon className="h-4 w-4 text-blue-500" strokeWidth="2" />
-                    <p className="text-sm font-semibold text-gray-900">
-                      9 - 11 AM
+              {SLOT_DATA[slotTab].map((slot) => (
+                <div key={`${slotTab}-${slot.window}`}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <ClockIcon className="h-4 w-4 text-blue-500" strokeWidth="2" />
+                      <p className="text-sm font-semibold text-gray-900">
+                        {slot.window}
+                      </p>
+                    </div>
+                    {slot.aiPick && (
+                      <div className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-600 text-xs font-bold flex items-center gap-1">
+                        <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z" />
+                        </svg>
+                        AI Pick
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-end justify-between mb-2">
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900">{slot.successRate}%</p>
+                      <p className="text-xs text-gray-500">Success Rate</p>
+                    </div>
+                    <p className={`text-xs font-semibold ${slot.change.includes("↘") ? "text-red-500" : "text-green-600"}`}>
+                      {slot.change}
                     </p>
                   </div>
-                  <div className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-600 text-xs font-bold flex items-center gap-1">
-                    <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z" />
-                    </svg>
-                    AI Pick
+                  <p className="text-xs text-gray-500 mb-1.5">{slot.orders.toLocaleString()} orders</p>
+                  <div className="w-full bg-gray-200 rounded-full h-1.5">
+                    <div
+                      className="bg-blue-500 h-2 rounded-full"
+                      style={{ width: `${slot.successRate}%` }}
+                    ></div>
                   </div>
                 </div>
-                <div className="flex items-end justify-between mb-2">
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">97%</p>
-                    <p className="text-xs text-gray-500">Success Rate</p>
-                  </div>
-                  <p className="text-xs text-green-600 font-semibold">↗ 2.4%</p>
-                </div>
-                <p className="text-xs text-gray-500 mb-1.5">312 orders today</p>
-                <div className="w-full bg-gray-200 rounded-full h-1.5">
-                  <div
-                    className="bg-blue-500 h-2 rounded-full"
-                    style={{ width: "97%" }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Slot 2 */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <ClockIcon className="h-4 w-4 text-blue-500" strokeWidth="2" />
-                    <p className="text-sm font-semibold text-gray-900">
-                      11 AM - 1 PM
-                    </p>
-                  </div>
-                  <div className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-600 text-xs font-bold flex items-center gap-1">
-                    <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z" />
-                    </svg>
-                    AI Pick
-                  </div>
-                </div>
-                <div className="flex items-end justify-between mb-2">
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">94%</p>
-                    <p className="text-xs text-gray-500">Success Rate</p>
-                  </div>
-                  <p className="text-xs text-green-600 font-semibold">↗ 1.8%</p>
-                </div>
-                <p className="text-xs text-gray-500 mb-1.5">278 orders today</p>
-                <div className="w-full bg-gray-200 rounded-full h-1.5">
-                  <div
-                    className="bg-blue-500 h-2 rounded-full"
-                    style={{ width: "94%" }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Slot 3 */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <ClockIcon className="h-4 w-4 text-blue-500" strokeWidth="2" />
-                    <p className="text-sm font-semibold text-gray-900">
-                      5 - 7 PM
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-end justify-between mb-2">
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">91%</p>
-                    <p className="text-xs text-gray-500">Success Rate</p>
-                  </div>
-                  <p className="text-xs text-red-500 font-semibold">↘ 0.5%</p>
-                </div>
-                <p className="text-xs text-gray-500 mb-1.5">356 orders today</p>
-                <div className="w-full bg-gray-200 rounded-full h-1.5">
-                  <div
-                    className="bg-blue-500 h-2 rounded-full"
-                    style={{ width: "91%" }}
-                  ></div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -478,7 +471,9 @@ export default function OverviewPage() {
             <h3 className="text-gray-400 text-xs font-medium mb-2">
               Active Agents
             </h3>
-            <p className="text-3xl font-bold text-gray-900 mb-1">42</p>
+            <p className="text-3xl font-bold text-gray-900 mb-1">
+              {loading ? "--" : metrics.activeAgents}
+            </p>
             <p className="text-green-600 text-xs font-semibold">
               All routes optimized
             </p>
@@ -489,9 +484,11 @@ export default function OverviewPage() {
             <h3 className="text-gray-400 text-xs font-medium mb-2">
               Pending Confirmations
             </h3>
-            <p className="text-3xl font-bold text-gray-900 mb-1">156</p>
+            <p className="text-3xl font-bold text-gray-900 mb-1">
+              {loading ? "--" : metrics.pendingConfirmations}
+            </p>
             <p className="text-orange-500 text-xs font-semibold">
-              87% confirmed
+              {loading ? "--" : "87% confirmed *"}
             </p>
           </div>
 
@@ -500,7 +497,9 @@ export default function OverviewPage() {
             <h3 className="text-gray-400 text-xs font-medium mb-2">
               AI Predictions Accuracy
             </h3>
-            <p className="text-3xl font-bold text-gray-900 mb-1">96.8%</p>
+            <p className="text-3xl font-bold text-gray-900 mb-1">
+              {loading ? "--" : metrics.aiPredictionAccuracy}
+            </p>
             <p className="text-gray-400 text-xs font-medium">
               Last 7 days
             </p>

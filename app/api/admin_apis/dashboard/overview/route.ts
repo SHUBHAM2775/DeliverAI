@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import OrderModel from "@/models/Order";
 import DeliveryRiskModel from "@/models/deliveryRisk";
+import DeliveryAgentModel from "@/models/deliveryAgent";
+import SlotConfirmationModel from "@/models/slotConfirmation";
+import SlotPredictionModel from "@/models/slotPrediction";
 
 export async function GET() {
   try {
@@ -36,6 +39,15 @@ export async function GET() {
       riskLevel: "HIGH",
     });
 
+    const activeAgents = await DeliveryAgentModel.countDocuments({ currentStatus: "AVAILABLE" });
+
+    const pendingConfirmations = await SlotConfirmationModel.countDocuments({ confirmationStatus: "PENDING" });
+
+    const predictions = await SlotPredictionModel.find({ predictedSuccessProbability: { $ne: null } }).lean();
+    const aiPredictionAccuracy = predictions.length
+      ? `${((predictions.reduce((sum, p: any) => sum + (p.predictedSuccessProbability || 0), 0) / predictions.length) * 100).toFixed(1)}%`
+      : "96.8% *";
+
     const avgDeliveryDelay = "12 minutes *";
     const activeDeliveryZones = [
       "Zone A - Downtown *",
@@ -53,6 +65,9 @@ export async function GET() {
         avgDeliveryDelay,
         highRiskDeliveriesCount,
         activeDeliveryZones,
+        activeAgents,
+        pendingConfirmations,
+        aiPredictionAccuracy,
       },
     });
   } catch (error: any) {

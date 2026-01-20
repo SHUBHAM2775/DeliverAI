@@ -78,7 +78,7 @@ type SlotInfo = {
 };
 
 // Slot configuration fallback data
-const initialSlots: SlotInfo[] = [
+const FALLBACK_SLOTS: SlotInfo[] = [
     { id: "fallback-1", name: "Early Morning", time: "6:00 - 8:00 AM", demand: 45, capacity: 60, active: true, aiPreferred: false, bookedCount: 30, successProbability: 89 },
     { id: "fallback-2", name: "Morning Rush", time: "9:00 - 11:00 AM", demand: 85, capacity: 80, active: true, aiPreferred: true, bookedCount: 70, successProbability: 94 },
     { id: "fallback-3", name: "Midday", time: "11:00 AM - 1:00 PM", demand: 70, capacity: 75, active: true, aiPreferred: true, bookedCount: 52, successProbability: 92 },
@@ -93,7 +93,7 @@ const recommendations = [
 ];
 
 export default function SlotIntelligencePage() {
-    const [slots, setSlots] = useState<SlotInfo[]>(initialSlots);
+    const [slots, setSlots] = useState<SlotInfo[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -126,6 +126,9 @@ export default function SlotIntelligencePage() {
                 }
             } catch (err) {
                 console.error("Slot intelligence fetch failed", err);
+                if (isMounted) {
+                    setSlots(FALLBACK_SLOTS);
+                }
             } finally {
                 if (isMounted) setLoading(false);
             }
@@ -154,15 +157,16 @@ export default function SlotIntelligencePage() {
     const avgSuccess = slots.length
         ? (slots.reduce((sum, slot) => sum + slot.successProbability, 0) / slots.length).toFixed(1)
         : "--";
-    const capacityUsed = slots.length
-        ? Math.min(
-            100,
-            (
-                slots.reduce((sum, slot) => sum + Math.min(slot.bookedCount, slot.capacity), 0) /
-                slots.reduce((sum, slot) => sum + (slot.capacity || 0), 0 || 1)
-            ) * 100
-          ).toFixed(0)
+    const totalCapacity = slots.reduce((sum, slot) => sum + (slot.capacity || 0), 0);
+    const usedCapacity = slots.reduce((sum, slot) => sum + Math.min(slot.bookedCount, slot.capacity || 0), 0);
+    const capacityUsed = totalCapacity > 0
+        ? Math.min(100, (usedCapacity / totalCapacity) * 100).toFixed(0)
         : "--";
+
+    const displayActiveSlots = loading ? "--" : activeSlots;
+    const displayAiPreferred = loading ? "--" : aiPreferredCount;
+    const displayAvgSuccess = loading ? "--" : avgSuccess;
+    const displayCapacityUsed = loading ? "--" : capacityUsed;
 
     return (
         <div className="flex-1 overflow-y-auto">
@@ -177,7 +181,7 @@ export default function SlotIntelligencePage() {
                             <ClockIcon />
                             <span className="text-gray-700 font-medium">Active Slots</span>
                         </div>
-                        <div className="text-4xl font-bold text-gray-900">{activeSlots}</div>
+                        <div className="text-4xl font-bold text-gray-900">{displayActiveSlots}</div>
                         <div className="text-gray-500 text-sm">of 8 total</div>
                     </div>
 
@@ -187,7 +191,7 @@ export default function SlotIntelligencePage() {
                             <SparklesIcon />
                             <span className="text-gray-700 font-medium">AI Preferred</span>
                         </div>
-                        <div className="text-4xl font-bold text-gray-900">{aiPreferredCount}</div>
+                        <div className="text-4xl font-bold text-gray-900">{displayAiPreferred}</div>
                         <div className="text-gray-500 text-sm">optimized slots</div>
                     </div>
 
@@ -197,7 +201,7 @@ export default function SlotIntelligencePage() {
                             <TrendingUpIcon />
                             <span className="text-gray-700 font-medium">Avg Success</span>
                         </div>
-                        <div className="text-4xl font-bold text-gray-900">{avgSuccess}%</div>
+                        <div className="text-4xl font-bold text-gray-900">{displayAvgSuccess}%</div>
                         <div className="text-gray-500 text-sm">across all slots</div>
                     </div>
 
@@ -207,7 +211,7 @@ export default function SlotIntelligencePage() {
                             <UsersIcon />
                             <span className="text-gray-700 font-medium">Capacity Used</span>
                         </div>
-                        <div className="text-4xl font-bold text-gray-900">{capacityUsed}%</div>
+                        <div className="text-4xl font-bold text-gray-900">{displayCapacityUsed}%</div>
                         <div className="text-gray-500 text-sm">average utilization</div>
                     </div>
                 </div>
