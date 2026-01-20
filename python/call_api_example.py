@@ -3,6 +3,7 @@ Example: How to call the API from another file
 This demonstrates how to use the API function
 """
 
+import json
 from api import recommend_delivery_slots, print_recommendations
 
 
@@ -34,6 +35,11 @@ def main():
     
     print_recommendations(result)
     
+    # Save result to JSON file
+    with open('recommendation_result_example1.json', 'w') as f:
+        json.dump(result, f, indent=2, default=str)
+    print("\n✓ Results saved to 'recommendation_result_example1.json'")
+    
     # Example 2: Different city (Bangalore)
     print("\n\n" + "="*70)
     print("EXAMPLE 2: Different City (Bangalore)")
@@ -59,6 +65,11 @@ def main():
     
     print_recommendations(result)
     
+    # Save result to JSON file
+    with open('recommendation_result_example2.json', 'w') as f:
+        json.dump(result, f, indent=2, default=str)
+    print("\n✓ Results saved to 'recommendation_result_example2.json'")
+    
     # Example 3: Another city (Pune) with date and time preferences
     print("\n\n" + "="*70)
     print("EXAMPLE 3: Pune with Date/Time Preferences")
@@ -83,6 +94,11 @@ def main():
     )
     
     print_recommendations(result)
+    
+    # Save result to JSON file
+    with open('recommendation_result_example3.json', 'w') as f:
+        json.dump(result, f, indent=2, default=str)
+    print("\n✓ Results saved to 'recommendation_result_example3.json'")
 
 
 if __name__ == "__main__":
