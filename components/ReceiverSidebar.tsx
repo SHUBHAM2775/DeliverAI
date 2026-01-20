@@ -12,7 +12,7 @@ import {
 
 const receiverMenuItems = [
     { name: "Slot Selection", href: "/receiver_page/slot-selection", icon: ClipboardDocumentListIcon },
-    { name: "My Orders", href: "/receiver_page/orders", icon: CheckCircleIcon },
+    { name: "My Orders", href: "/receiver_page/confirmation", icon: CheckCircleIcon },
     { name: "Notifications", href: "/receiver_page/notifications", icon: BellIcon },
 ];
 
@@ -42,13 +42,12 @@ export default function ReceiverSidebar() {
                         <div key={item.name} className="relative">
                             <Link
                                 href={item.href}
-                                className={`p-2.5 rounded-lg transition block ${
-                                    isExactActive
+                                className={`p-2.5 rounded-lg transition block ${isExactActive
                                         ? "bg-yellow-500 text-white"
                                         : isActive
-                                        ? "bg-yellow-500/50 text-white"
-                                        : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
-                                }`}
+                                            ? "bg-yellow-500/50 text-white"
+                                            : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                                    }`}
                                 onMouseEnter={() => setHoveredItem(item.name)}
                                 onMouseLeave={() => setHoveredItem(null)}
                             >
