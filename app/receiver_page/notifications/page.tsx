@@ -23,12 +23,33 @@ const availableSlots = [
     { time: "5:00 - 7:00 PM", rate: 70, badge: "Popular" },
 ];
 
+// Generate 7 days window
+const generateDaysWindow = () => {
+    const days = [];
+    const today = new Date();
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        days.push({
+            dayName: dayNames[date.getDay()],
+            date: date.getDate(),
+            month: date.getMonth() + 1,
+            year: date.getFullYear(),
+            fullDate: date.toISOString().split('T')[0],
+        });
+    }
+    return days;
+};
+
 export default function NotificationsPage() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<"reminder" | "reschedule" | "feedback">("reminder");
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
     const [preferredTime, setPreferredTime] = useState(12);
-    const [selectedDate, setSelectedDate] = useState("");
+    const [selectedDate, setSelectedDate] = useState<string>(generateDaysWindow()[0].fullDate);
+    const daysWindow = generateDaysWindow();
     const [rating, setRating] = useState(0);
     const [feedback, setFeedback] = useState("");
     const [wasConvenient, setWasConvenient] = useState<boolean | null>(null);
@@ -241,12 +262,22 @@ export default function NotificationsPage() {
 
                                     <div className="mb-4">
                                         <label className="block text-xs text-gray-600 mb-2">Date</label>
-                                        <input
-                                            type="date"
-                                            value={selectedDate}
-                                            onChange={(e) => setSelectedDate(e.target.value)}
-                                            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                        />
+                                        <div className="grid grid-cols-7 gap-1">
+                                            {daysWindow.map((day, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => setSelectedDate(day.fullDate)}
+                                                    className={`p-1.5 rounded-lg text-center transition ${
+                                                        selectedDate === day.fullDate
+                                                            ? 'bg-indigo-500 text-white'
+                                                            : 'bg-white text-gray-700 hover:bg-gray-100'
+                                                    }`}
+                                                >
+                                                    <div className="text-[9px] font-medium">{day.dayName}</div>
+                                                    <div className="text-xs font-bold">{day.date}</div>
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
 
                                     <div className="mb-4">
