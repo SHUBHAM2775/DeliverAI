@@ -5,6 +5,9 @@ export interface Notification extends Document {
   orderId?: Types.ObjectId;
   type?: "REMINDER" | "ALERT";
   message: string;
+  isRead?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const notificationSchema = new Schema<Notification>(
@@ -13,8 +16,9 @@ const notificationSchema = new Schema<Notification>(
     orderId: { type: Schema.Types.ObjectId, ref: "Order" },
     type: { type: String, enum: ["REMINDER", "ALERT"] },
     message: { type: String, required: true },
+    isRead: { type: Boolean, default: false },
   },
-  { collection: "notifications" },
+  { collection: "notifications", timestamps: true },
 );
 
 const NotificationModel =

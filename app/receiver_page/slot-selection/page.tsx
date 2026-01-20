@@ -10,7 +10,7 @@ import {
     FireIcon,
     ClockIcon,
 } from "@heroicons/react/24/outline";
-import ProfileDropdown from "@/components/ProfileDropdown";
+import ReceiverHeader from "@/components/ReceiverHeader";
 
 // Time slots data
 const timeSlots = [
@@ -29,7 +29,7 @@ const generateDaysWindow = () => {
     const days = [];
     const today = new Date();
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
+
     for (let i = 0; i < 7; i++) {
         const date = new Date(today);
         date.setDate(today.getDate() + i);
@@ -68,6 +68,7 @@ export default function SlotSelectionPage() {
     return (
         <div className="flex-1 overflow-y-auto bg-gray-50">
             <div className="p-8 min-h-full">
+                <ReceiverHeader title="Slot Selection" subtitle="Align on delivery time" />
                 <div className="grid grid-cols-3 gap-6">
                     {/* Left Column - Order Details */}
                     <div className="col-span-2 space-y-6">
@@ -107,17 +108,15 @@ export default function SlotSelectionPage() {
                                     <div
                                         key={idx}
                                         onClick={() => setSelectedSlot(slot.time)}
-                                        className={`${slot.color} rounded-xl p-4 cursor-pointer transition-all hover:scale-105 relative ${
-                                            selectedSlot === slot.time ? 'ring-4 ring-indigo-500 ring-offset-2' : ''
-                                        }`}
+                                        className={`${slot.color} rounded-xl p-4 cursor-pointer transition-all hover:scale-105 relative ${selectedSlot === slot.time ? 'ring-4 ring-indigo-500 ring-offset-2' : ''
+                                            }`}
                                     >
                                         {/* Badge */}
                                         {slot.badge && (
-                                            <div className={`absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1 ${
-                                                slot.badge === "AI Pick" 
-                                                    ? "bg-gray-900 text-white" 
+                                            <div className={`absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1 ${slot.badge === "AI Pick"
+                                                    ? "bg-gray-900 text-white"
                                                     : "bg-white text-gray-700 border border-gray-200"
-                                            }`}>
+                                                }`}>
                                                 {slot.badge === "AI Pick" ? (
                                                     <SparklesIcon className="w-3 h-3" />
                                                 ) : (
@@ -126,7 +125,7 @@ export default function SlotSelectionPage() {
                                                 {slot.badge}
                                             </div>
                                         )}
-                                        
+
                                         <div className="text-center">
                                             <p className={`text-lg font-bold ${slot.textColor} mb-1`}>{slot.time}</p>
                                             <p className={`text-xl font-semibold ${slot.textColor}`}>{slot.rate}%</p>
@@ -155,11 +154,10 @@ export default function SlotSelectionPage() {
                                         <button
                                             key={idx}
                                             onClick={() => setSelectedDate(day.fullDate)}
-                                            className={`p-2 rounded-lg text-center transition ${
-                                                selectedDate === day.fullDate
+                                            className={`p-2 rounded-lg text-center transition ${selectedDate === day.fullDate
                                                     ? 'bg-indigo-500 text-white'
                                                     : 'bg-white text-gray-700 hover:bg-gray-100'
-                                            }`}
+                                                }`}
                                         >
                                             <div className="text-[10px] font-medium">{day.dayName}</div>
                                             <div className="text-sm font-bold">{day.date}</div>

@@ -14,6 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 import { StarIcon as StarIconOutline } from "@heroicons/react/24/outline";
+import ReceiverHeader from "@/components/ReceiverHeader";
 
 const availableSlots = [
     { time: "8:00 - 11:00 AM", rate: 88, badge: "AI Pick" },
@@ -22,14 +23,38 @@ const availableSlots = [
     { time: "5:00 - 7:00 PM", rate: 70, badge: "Popular" },
 ];
 
+// Generate 7 days window
+const generateDaysWindow = () => {
+    const days = [];
+    const today = new Date();
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        days.push({
+            dayName: dayNames[date.getDay()],
+            date: date.getDate(),
+            month: date.getMonth() + 1,
+            year: date.getFullYear(),
+            fullDate: date.toISOString().split('T')[0],
+        });
+    }
+    return days;
+};
+
 export default function NotificationsPage() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<"reminder" | "reschedule" | "feedback">("reminder");
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
     const [preferredTime, setPreferredTime] = useState(12);
-    const [selectedDate, setSelectedDate] = useState("");
+    const [selectedDate, setSelectedDate] = useState<string>(generateDaysWindow()[0].fullDate);
+    const daysWindow = generateDaysWindow();
     const [rating, setRating] = useState(0);
     const [feedback, setFeedback] = useState("");
+    const [wasConvenient, setWasConvenient] = useState<boolean | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+    const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
     const handleReschedule = () => {
         setActiveTab("reschedule");
@@ -43,47 +68,66 @@ export default function NotificationsPage() {
         router.push("/receiver_page/confirmation");
     };
 
-    const handleSubmitFeedback = () => {
-        router.push("/receiver_page/confirmation");
+    const handleSubmitFeedback = async () => {
+        setSubmitMessage(null);
+        try {
+            setSubmitting(true);
+            const res = await fetch("/api/feedback", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    rating,
+                    comment: feedback,
+                    wasConvenient,
+                }),
+            });
+            if (!res.ok) {
+                throw new Error("Failed to submit feedback");
+            }
+            setSubmitMessage("Feedback submitted successfully");
+            // Optionally navigate after success
+            router.push("/receiver_page/confirmation");
+        } catch (error) {
+            console.error(error);
+            setSubmitMessage("Could not submit feedback. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
         <div className="flex-1 overflow-y-auto bg-gray-50">
             <div className="p-8 min-h-full">
-                {/* Header */}
-                <h1 className="text-2xl font-bold text-gray-900 mb-8">Notifications</h1>
+                <ReceiverHeader title="Notifications" subtitle="Stay in sync with deliveries" />
 
                 {/* Tabs */}
                 <div className="flex gap-3 mb-8">
                     <button
                         onClick={() => setActiveTab("reminder")}
-                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${
-                            activeTab === "reminder"
+                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${activeTab === "reminder"
                                 ? "bg-indigo-600 text-white"
                                 : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                        }`}
+                            }`}
                     >
                         <BellIcon className="w-4 h-4" />
                         Reminder
                     </button>
                     <button
                         onClick={() => setActiveTab("reschedule")}
-                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${
-                            activeTab === "reschedule"
+                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${activeTab === "reschedule"
                                 ? "bg-indigo-600 text-white"
                                 : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                        }`}
+                            }`}
                     >
                         <CalendarIcon className="w-4 h-4" />
                         Reschedule
                     </button>
                     <button
                         onClick={() => setActiveTab("feedback")}
-                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${
-                            activeTab === "feedback"
+                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${activeTab === "feedback"
                                 ? "bg-indigo-600 text-white"
                                 : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                        }`}
+                            }`}
                     >
                         <ChatBubbleBottomCenterTextIcon className="w-4 h-4" />
                         Feedback
@@ -181,16 +225,14 @@ export default function NotificationsPage() {
                                             <div
                                                 key={idx}
                                                 onClick={() => setSelectedSlot(slot.time)}
-                                                className={`bg-green-200 rounded-lg p-2.5 cursor-pointer transition-all hover:scale-105 relative ${
-                                                    selectedSlot === slot.time ? 'ring-4 ring-indigo-500 ring-offset-2' : ''
-                                                }`}
+                                                className={`bg-green-200 rounded-lg p-2.5 cursor-pointer transition-all hover:scale-105 relative ${selectedSlot === slot.time ? 'ring-4 ring-indigo-500 ring-offset-2' : ''
+                                                    }`}
                                             >
                                                 {slot.badge && (
-                                                    <div className={`absolute -top-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[8px] font-medium flex items-center gap-0.5 ${
-                                                        slot.badge === "AI Pick" 
-                                                            ? "bg-gray-900 text-white" 
+                                                    <div className={`absolute -top-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[8px] font-medium flex items-center gap-0.5 ${slot.badge === "AI Pick"
+                                                            ? "bg-gray-900 text-white"
                                                             : "bg-white text-gray-700 border border-gray-200"
-                                                    }`}>
+                                                        }`}>
                                                         {slot.badge === "AI Pick" ? (
                                                             <SparklesIcon className="w-2.5 h-2.5" />
                                                         ) : (
@@ -220,12 +262,22 @@ export default function NotificationsPage() {
 
                                     <div className="mb-4">
                                         <label className="block text-xs text-gray-600 mb-2">Date</label>
-                                        <input
-                                            type="date"
-                                            value={selectedDate}
-                                            onChange={(e) => setSelectedDate(e.target.value)}
-                                            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                        />
+                                        <div className="grid grid-cols-7 gap-1">
+                                            {daysWindow.map((day, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => setSelectedDate(day.fullDate)}
+                                                    className={`p-1.5 rounded-lg text-center transition ${
+                                                        selectedDate === day.fullDate
+                                                            ? 'bg-indigo-500 text-white'
+                                                            : 'bg-white text-gray-700 hover:bg-gray-100'
+                                                    }`}
+                                                >
+                                                    <div className="text-[9px] font-medium">{day.dayName}</div>
+                                                    <div className="text-xs font-bold">{day.date}</div>
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
 
                                     <div className="mb-4">
@@ -286,13 +338,27 @@ export default function NotificationsPage() {
 
                             {/* Quick Buttons */}
                             <div className="flex gap-4 justify-center mb-8">
-                                <button className="px-8 py-3 bg-green-700 rounded-xl text-white font-semibold hover:bg-green-800 transition flex items-center gap-2">
+                                <button
+                                    onClick={() => setWasConvenient(true)}
+                                    className={`px-8 py-3 rounded-xl font-semibold transition flex items-center gap-2 ${
+                                        wasConvenient === true
+                                            ? "bg-green-800 text-white"
+                                            : "bg-green-700 text-white hover:bg-green-800"
+                                    }`}
+                                >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                     Yes, Perfect!
                                 </button>
-                                <button className="px-8 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition flex items-center gap-2">
+                                <button
+                                    onClick={() => setWasConvenient(false)}
+                                    className={`px-8 py-3 rounded-xl font-semibold transition flex items-center gap-2 ${
+                                        wasConvenient === false
+                                            ? "bg-gray-200 text-gray-800 border-2 border-gray-300"
+                                            : "bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50"
+                                    }`}
+                                >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                     </svg>
@@ -334,10 +400,14 @@ export default function NotificationsPage() {
                             {/* Submit Button */}
                             <button
                                 onClick={handleSubmitFeedback}
-                                className="w-full py-4 bg-indigo-600 rounded-xl text-white font-semibold hover:bg-indigo-700 transition"
+                                disabled={submitting}
+                                className="w-full py-4 bg-indigo-600 rounded-xl text-white font-semibold hover:bg-indigo-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
                             >
-                                Submit Feedback
+                                {submitting ? "Submitting..." : "Submit Feedback"}
                             </button>
+                            {submitMessage && (
+                                <p className="text-center text-sm text-gray-700 mt-3">{submitMessage}</p>
+                            )}
                         </div>
                     </div>
                 )}

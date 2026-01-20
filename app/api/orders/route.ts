@@ -81,6 +81,58 @@ async function upsertReceiver({
   return receiver._id;
 }
 
+export async function GET(req: Request) {
+  try {
+    await connectDB();
+
+    const { searchParams } = new URL(req.url);
+    // By default, return all orders. Pass all=false to filter by sender.
+    const includeAll = searchParams.get("all") !== "false";
+
+    const defaultSenderEmail = process.env.DEFAULT_SENDER_EMAIL || "sender@example.com";
+    let sender = await UserModel.findOne({ email: defaultSenderEmail, role: "SENDER" });
+
+    // Fallback: if the configured sender email does not exist, use any SENDER to avoid empty dashboards.
+    if (!sender) {
+      sender = await UserModel.findOne({ role: "SENDER" });
+    }
+
+    if (!sender && !includeAll) {
+      return NextResponse.json({ orders: [] });
+    }
+
+    const query = includeAll ? {} : { senderId: sender?._id };
+
+    const orders = await OrderModel.find(query)
+      .populate("receiverId", "name phone email")
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+
+    const formattedOrders = orders.map((order: any) => ({
+      id: order._id.toString(),
+      commodity: order.commodityName,
+      category: order.commodityCategory || "N/A",
+      customer: order.receiverId?.name || "Unknown",
+      area: order.area,
+      pincode: order.pincode,
+      workingHours: order.workingStartTime && order.workingEndTime
+        ? `${order.workingStartTime} - ${order.workingEndTime}`
+        : "N/A",
+      status: order.orderStatus,
+      description: order.description,
+      quantity: order.quantity,
+      isFragile: order.isFragile,
+      createdAt: order.createdAt,
+    }));
+
+    return NextResponse.json({ orders: formattedOrders });
+  } catch (error) {
+    console.error("Failed to fetch orders", error);
+    return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const {
