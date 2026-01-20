@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
     MapPinIcon,
     SparklesIcon,
-    FireIcon,
     ClockIcon,
+    ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import ReceiverHeader from "@/components/ReceiverHeader";
 
@@ -33,56 +33,128 @@ interface OrderData {
     createdAt?: Date;
 }
 
+interface SlotRecommendation {
+    date: string;
+    slot: string;
+    datetime: string;
+    success_probability: number;
+    day_of_week: number;
+    hour: number;
+    period: string;
+    risk_score: number;
+    risk_reasons: string | string[];
+    day_name: string;
+}
+
+interface RecommendationsResponse {
+    success: boolean;
+    recommendations_by_date?: Record<string, SlotRecommendation[]>;
+    message?: string;
+}
+
 interface SlotSelectionClientProps {
     orderData: OrderData;
     uuid: string;
 }
 
-// Time slots data
-const timeSlots = [
-    { time: "8:00 - 10:00 AM", rate: 92, color: "bg-[#D1FAE5]", textColor: "text-green-700", badge: "AI Pick" },
-    { time: "10:00 - 12:00 PM", rate: 85, color: "bg-[#D1FAE5]", textColor: "text-green-700", badge: "Popular" },
-    { time: "12:00 - 2:00 PM", rate: 78, color: "bg-[#D1FAE5]", textColor: "text-green-700", badge: null },
-    { time: "2:00 - 4:00 PM", rate: 65, color: "bg-[#D1FAE5]", textColor: "text-green-700", badge: null },
-    { time: "4:00 - 6:00 PM", rate: 45, color: "bg-[#FEF3C7]", textColor: "text-yellow-700", badge: null },
-    { time: "6:00 - 8:00 PM", rate: 72, color: "bg-[#D1FAE5]", textColor: "text-green-700", badge: "Popular" },
-    { time: "8:00 - 10:00 PM", rate: 35, color: "bg-[#FECACA]", textColor: "text-orange-700", badge: null },
-    { time: "10:00 - 11:00 PM", rate: 18, color: "bg-[#FECACA]", textColor: "text-red-700", badge: null },
-];
-
-// Generate 7 days window starting 3 days from today
-// This provides a buffer period for damage recovery when accessed via emergency reschedule emails
-const generateDaysWindow = () => {
+// Generate 7 days window fallback
+const generateDaysWindow = (): { dayName: string; date: number; fullDate: string }[] => {
     const days = [];
     const today = new Date();
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const bufferDays = 3; // 3-day buffer for sender to recover from disruptions
-
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     for (let i = 0; i < 7; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() + bufferDays + i); // Start 3 days later
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
         days.push({
-            dayName: dayNames[date.getDay()],
-            date: date.getDate(),
-            month: date.getMonth() + 1,
-            year: date.getFullYear(),
-            fullDate: date.toISOString().split('T')[0],
+            dayName: dayNames[d.getDay()],
+            date: d.getDate(),
+            fullDate: d.toISOString().split("T")[0],
         });
     }
     return days;
 };
 
+function slotToLabel(slot: string): string {
+    const [a, b] = slot.split("-").map((x) => x.trim());
+    if (!a || !b) return slot;
+    const ha = parseInt(a, 10);
+    const hb = parseInt(b, 10);
+    const am = (h: number) => (h < 12 ? `${h} AM` : h === 12 ? "12 PM" : `${h - 12} PM`);
+    return `${am(ha)} - ${am(hb)}`;
+}
+
+function slotStyle(success: number, risk: number): { bg: string; text: string } {
+    if (success >= 90) return { bg: "bg-[#D1FAE5]", text: "text-green-700" };
+    if (success >= 70 || risk < 18) return { bg: "bg-[#FEF3C7]", text: "text-yellow-700" };
+    return { bg: "bg-[#FECACA]", text: "text-red-700" };
+}
+
 export default function SlotSelectionClient({ orderData, uuid }: SlotSelectionClientProps) {
     const router = useRouter();
+    const [recommendations, setRecommendations] = useState<RecommendationsResponse | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-    const [selectedDate, setSelectedDate] = useState<string>(generateDaysWindow()[0].fullDate);
+    const [selectedDate, setSelectedDate] = useState<string>("");
     const [preferredTime, setPreferredTime] = useState(12);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const daysWindow = generateDaysWindow();
+    useEffect(() => {
+        let cancelled = false;
+        setLoading(true);
+        setError(null);
+        fetch(`/api/slots/recommend/${encodeURIComponent(uuid)}`)
+            .then((r) => r.json())
+            .then((data: RecommendationsResponse & { error?: string }) => {
+                if (cancelled) return;
+                if (data.error) {
+                    setError(data.error);
+                    setRecommendations(null);
+                    return;
+                }
+                setRecommendations(data);
+                const byDate = data?.recommendations_by_date;
+                const dates = byDate ? Object.keys(byDate).sort() : [];
+                if (dates.length > 0 && !selectedDate) setSelectedDate(dates[0]);
+            })
+            .catch((e) => {
+                if (!cancelled) {
+                    setError(e?.message || "Failed to load recommendations");
+                    setRecommendations(null);
+                }
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false);
+            });
+        return () => { cancelled = true; };
+    }, [uuid]);
+
+    const byDate = recommendations?.recommendations_by_date ?? {};
+    const dates = Object.keys(byDate).sort();
+    const daysWindow = dates.length > 0
+        ? dates.map((fullDate) => {
+            const d = new Date(fullDate);
+            const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            return { dayName: dayNames[d.getDay()], date: d.getDate(), fullDate };
+        })
+        : generateDaysWindow();
+    const effectiveDate = selectedDate || daysWindow[0]?.fullDate || "";
+    const slotsForDay = (byDate[effectiveDate] ?? []) as SlotRecommendation[];
 
     const handleSuggestSlot = () => {
-        alert(`Suggested slot for ${preferredTime}:00 on ${selectedDate}`);
+        if (slotsForDay.length === 0) {
+            alert("No slots available for this date.");
+            return;
+        }
+        const closest = slotsForDay.reduce((best, s) => {
+            const diff = Math.abs(s.hour - preferredTime);
+            const bestDiff = Math.abs((best?.hour ?? preferredTime) - preferredTime);
+            return diff <= bestDiff && (s.success_probability > (best?.success_probability ?? 0)) ? s : best;
+        }, slotsForDay[0]);
+        if (closest) {
+            setSelectedSlot(`${closest.date}_${closest.slot}`);
+            alert(`Suggested: ${slotToLabel(closest.slot)} — ${closest.success_probability.toFixed(1)}% success, ${closest.risk_score.toFixed(1)}% risk`);
+        }
     };
 
     const handleConfirmSlot = async () => {
@@ -90,23 +162,30 @@ export default function SlotSelectionClient({ orderData, uuid }: SlotSelectionCl
             alert("Please select a time slot first");
             return;
         }
-
         setIsSubmitting(true);
         try {
-            // TODO: Implement slot confirmation API call
-            // For now, just navigate to confirmation page
-            router.push(`/receiver_page/confirmation?orderId=${orderData.id}`);
-        } catch (error) {
-            console.error("Failed to confirm slot", error);
+            const [d, slot] = selectedSlot.includes("_") ? selectedSlot.split("_") : [effectiveDate, selectedSlot];
+            router.push(`/receiver_page/confirmation?orderId=${orderData.id}&date=${d || effectiveDate}&slot=${encodeURIComponent(slot || selectedSlot)}`);
+        } catch (e) {
+            console.error("Failed to confirm slot", e);
             alert("Failed to confirm slot. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const formatOrderId = (id: string) => {
-        return `ORD-${id.slice(-4).toUpperCase()}`;
-    };
+    const formatOrderId = (id: string) => `ORD-${id.slice(-4).toUpperCase()}`;
+
+    // Sync selectedDate when we have days from API or fallback and none selected
+    useEffect(() => {
+        if (loading || selectedDate) return;
+        const first = daysWindow[0]?.fullDate;
+        if (first) setSelectedDate(first);
+    }, [loading, selectedDate, daysWindow]);
+
+    const bestSlotForDay = slotsForDay.length > 0
+        ? slotsForDay.reduce((a, b) => (a.success_probability >= b.success_probability ? a : b))
+        : null;
 
     return (
         <div className="flex-1 overflow-y-auto bg-gray-50">
@@ -165,49 +244,62 @@ export default function SlotSelectionClient({ orderData, uuid }: SlotSelectionCl
                                     )}
                                     <div className="flex items-center gap-2 text-sm text-indigo-600 mt-3">
                                         <MapPinIcon className="w-4 h-4" />
-                                        <span>{orderData.deliveryAddress}, {orderData.area} - {orderData.pincode}</span>
+                                        <span>{orderData.deliveryAddress}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Choose Delivery Slot */}
+                        {/* Choose Delivery Slot - ML recommendations by date */}
                         <div className="bg-white rounded-2xl p-6 border border-gray-100">
                             <h3 className="text-lg font-bold text-gray-900 mb-2">Choose Your Delivery Slot</h3>
                             <p className="text-sm text-gray-500 mb-6">Select a time slot with higher success rate for guaranteed delivery</p>
 
-                            {/* Time Slots Grid */}
-                            <div className="grid grid-cols-4 gap-3">
-                                {timeSlots.map((slot, idx) => (
-                                    <div
-                                        key={idx}
-                                        onClick={() => setSelectedSlot(slot.time)}
-                                        className={`${slot.color} rounded-xl p-4 cursor-pointer transition-all hover:scale-105 relative ${selectedSlot === slot.time ? 'ring-4 ring-indigo-500 ring-offset-2' : ''
-                                            }`}
-                                    >
-                                        {/* Badge */}
-                                        {slot.badge && (
-                                            <div className={`absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1 ${slot.badge === "AI Pick"
-                                                    ? "bg-gray-900 text-white"
-                                                    : "bg-white text-gray-700 border border-gray-200"
-                                                }`}>
-                                                {slot.badge === "AI Pick" ? (
-                                                    <SparklesIcon className="w-3 h-3" />
-                                                ) : (
-                                                    <FireIcon className="w-3 h-3" />
+                            {loading && (
+                                <div className="grid grid-cols-4 gap-3">
+                                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                                        <div key={i} className="rounded-xl p-4 bg-gray-100 animate-pulse h-24" />
+                                    ))}
+                                </div>
+                            )}
+                            {error && !loading && (
+                                <div className="flex items-center gap-2 p-4 rounded-xl bg-red-50 border border-red-100 text-red-700">
+                                    <ExclamationTriangleIcon className="w-5 h-5 flex-shrink-0" />
+                                    <span>{error}</span>
+                                </div>
+                            )}
+                            {!loading && !error && (
+                                <div className="grid grid-cols-4 gap-3">
+                                    {slotsForDay.map((s) => {
+                                        const key = `${s.date}_${s.slot}`;
+                                        const style = slotStyle(s.success_probability, s.risk_score);
+                                        const reasons = Array.isArray(s.risk_reasons) ? s.risk_reasons : (s.risk_reasons ? [String(s.risk_reasons)] : []);
+                                        const isAiPick = bestSlotForDay && bestSlotForDay.slot === s.slot && bestSlotForDay.date === s.date;
+                                        return (
+                                            <div
+                                                key={key}
+                                                onClick={() => setSelectedSlot(key)}
+                                                className={`${style.bg} rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02] relative ${selectedSlot === key ? "ring-4 ring-indigo-500 ring-offset-2" : ""}`}
+                                            >
+                                                {isAiPick && (
+                                                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1 bg-gray-900 text-white">
+                                                        <SparklesIcon className="w-3 h-3" /> AI Pick
+                                                    </div>
                                                 )}
-                                                {slot.badge}
+                                                <div className="text-center">
+                                                    <p className={`text-lg font-bold ${style.text} mb-1`}>{slotToLabel(s.slot)}</p>
+                                                    <p className={`text-xl font-semibold ${style.text}`}>{Number(s.success_probability).toFixed(1)}%</p>
+                                                    <p className="text-xs text-gray-500 mt-1">Success</p>
+                                                    <p className="text-xs text-gray-600 mt-0.5">Risk: {Number(s.risk_score).toFixed(1)}%</p>
+                                                    {reasons.length > 0 && (
+                                                        <p className="text-[10px] text-amber-700 mt-1 line-clamp-2">{reasons.join(", ")}</p>
+                                                    )}
+                                                </div>
                                             </div>
-                                        )}
-
-                                        <div className="text-center">
-                                            <p className={`text-lg font-bold ${slot.textColor} mb-1`}>{slot.time}</p>
-                                            <p className={`text-xl font-semibold ${slot.textColor}`}>{slot.rate}%</p>
-                                            <p className="text-xs text-gray-500 mt-1">Success rate</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
                     </div>
 

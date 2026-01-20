@@ -1,0 +1,743 @@
+{
+  "success": true,
+  "recommendations_by_date": {
+    "2026-01-21": [
+      {
+        "date": "2026-01-21",
+        "slot": "10-11",
+        "datetime": "2026-01-21T10:00:00",
+        "success_probability": 97.5199966430664,
+        "day_of_week": 2,
+        "hour": 10,
+        "period": "Morning",
+        "risk_score": 2.4800000190734863,
+        "risk_reasons": "",
+        "day_name": "Wednesday"
+      },
+      {
+        "date": "2026-01-21",
+        "slot": "11-12",
+        "datetime": "2026-01-21T11:00:00",
+        "success_probability": 83.80000305175781,
+        "day_of_week": 2,
+        "hour": 11,
+        "period": "Morning",
+        "risk_score": 16.200000762939453,
+        "risk_reasons": "",
+        "day_name": "Wednesday"
+      },
+      {
+        "date": "2026-01-21",
+        "slot": "12-13",
+        "datetime": "2026-01-21T12:00:00",
+        "success_probability": 82.55999755859375,
+        "day_of_week": 2,
+        "hour": 12,
+        "period": "Afternoon",
+        "risk_score": 17.440000534057617,
+        "risk_reasons": "",
+        "day_name": "Wednesday"
+      },
+      {
+        "date": "2026-01-21",
+        "slot": "13-14",
+        "datetime": "2026-01-21T13:00:00",
+        "success_probability": 81.79000091552734,
+        "day_of_week": 2,
+        "hour": 13,
+        "period": "Afternoon",
+        "risk_score": 18.209999084472656,
+        "risk_reasons": [
+          "Severe Traffic Congestion",
+          "Slightly Adverse Weather"
+        ],
+        "day_name": "Wednesday"
+      },
+      {
+        "date": "2026-01-21",
+        "slot": "14-15",
+        "datetime": "2026-01-21T14:00:00",
+        "success_probability": 81.44999694824219,
+        "day_of_week": 2,
+        "hour": 14,
+        "period": "Afternoon",
+        "risk_score": 18.549999237060547,
+        "risk_reasons": [
+          "Moderate Traffic",
+          "Slightly Adverse Weather"
+        ],
+        "day_name": "Wednesday"
+      },
+      {
+        "date": "2026-01-21",
+        "slot": "15-16",
+        "datetime": "2026-01-21T15:00:00",
+        "success_probability": 82.4000015258789,
+        "day_of_week": 2,
+        "hour": 15,
+        "period": "Afternoon",
+        "risk_score": 17.600000381469727,
+        "risk_reasons": "",
+        "day_name": "Wednesday"
+      },
+      {
+        "date": "2026-01-21",
+        "slot": "16-17",
+        "datetime": "2026-01-21T16:00:00",
+        "success_probability": 81.38999938964844,
+        "day_of_week": 2,
+        "hour": 16,
+        "period": "Afternoon",
+        "risk_score": 18.610000610351562,
+        "risk_reasons": [
+          "High Traffic Conditions",
+          "Slightly Adverse Weather"
+        ],
+        "day_name": "Wednesday"
+      },
+      {
+        "date": "2026-01-21",
+        "slot": "21-22",
+        "datetime": "2026-01-21T21:00:00",
+        "success_probability": 77.63999938964844,
+        "day_of_week": 2,
+        "hour": 21,
+        "period": "Night",
+        "risk_score": 22.360000610351562,
+        "risk_reasons": [
+          "Severe Traffic Congestion",
+          "Slightly Adverse Weather",
+          "Late Night Delivery (21.0:00)"
+        ],
+        "day_name": "Wednesday"
+      }
+    ],
+    "2026-01-22": [
+      {
+        "date": "2026-01-22",
+        "slot": "10-11",
+        "datetime": "2026-01-22T10:00:00",
+        "success_probability": 98.87999725341797,
+        "day_of_week": 3,
+        "hour": 10,
+        "period": "Morning",
+        "risk_score": 1.1200000047683716,
+        "risk_reasons": "",
+        "day_name": "Thursday"
+      },
+      {
+        "date": "2026-01-22",
+        "slot": "11-12",
+        "datetime": "2026-01-22T11:00:00",
+        "success_probability": 88.62999725341797,
+        "day_of_week": 3,
+        "hour": 11,
+        "period": "Morning",
+        "risk_score": 11.369999885559082,
+        "risk_reasons": "",
+        "day_name": "Thursday"
+      },
+      {
+        "date": "2026-01-22",
+        "slot": "12-13",
+        "datetime": "2026-01-22T12:00:00",
+        "success_probability": 87.79000091552734,
+        "day_of_week": 3,
+        "hour": 12,
+        "period": "Afternoon",
+        "risk_score": 12.210000038146973,
+        "risk_reasons": "",
+        "day_name": "Thursday"
+      },
+      {
+        "date": "2026-01-22",
+        "slot": "13-14",
+        "datetime": "2026-01-22T13:00:00",
+        "success_probability": 86.79000091552734,
+        "day_of_week": 3,
+        "hour": 13,
+        "period": "Afternoon",
+        "risk_score": 13.210000038146973,
+        "risk_reasons": "",
+        "day_name": "Thursday"
+      },
+      {
+        "date": "2026-01-22",
+        "slot": "14-15",
+        "datetime": "2026-01-22T14:00:00",
+        "success_probability": 86.08000183105469,
+        "day_of_week": 3,
+        "hour": 14,
+        "period": "Afternoon",
+        "risk_score": 13.920000076293945,
+        "risk_reasons": "",
+        "day_name": "Thursday"
+      },
+      {
+        "date": "2026-01-22",
+        "slot": "15-16",
+        "datetime": "2026-01-22T15:00:00",
+        "success_probability": 86.7699966430664,
+        "day_of_week": 3,
+        "hour": 15,
+        "period": "Afternoon",
+        "risk_score": 13.229999542236328,
+        "risk_reasons": "",
+        "day_name": "Thursday"
+      },
+      {
+        "date": "2026-01-22",
+        "slot": "16-17",
+        "datetime": "2026-01-22T16:00:00",
+        "success_probability": 86.02999877929688,
+        "day_of_week": 3,
+        "hour": 16,
+        "period": "Afternoon",
+        "risk_score": 13.970000267028809,
+        "risk_reasons": "",
+        "day_name": "Thursday"
+      },
+      {
+        "date": "2026-01-22",
+        "slot": "17-18",
+        "datetime": "2026-01-22T17:00:00",
+        "success_probability": 82.20999908447266,
+        "day_of_week": 3,
+        "hour": 17,
+        "period": "Evening",
+        "risk_score": 17.790000915527344,
+        "risk_reasons": "",
+        "day_name": "Thursday"
+      }
+    ],
+    "2026-01-23": [
+      {
+        "date": "2026-01-23",
+        "slot": "10-11",
+        "datetime": "2026-01-23T10:00:00",
+        "success_probability": 98.87999725341797,
+        "day_of_week": 4,
+        "hour": 10,
+        "period": "Morning",
+        "risk_score": 1.1200000047683716,
+        "risk_reasons": "",
+        "day_name": "Friday"
+      },
+      {
+        "date": "2026-01-23",
+        "slot": "11-12",
+        "datetime": "2026-01-23T11:00:00",
+        "success_probability": 88.62999725341797,
+        "day_of_week": 4,
+        "hour": 11,
+        "period": "Morning",
+        "risk_score": 11.369999885559082,
+        "risk_reasons": "",
+        "day_name": "Friday"
+      },
+      {
+        "date": "2026-01-23",
+        "slot": "12-13",
+        "datetime": "2026-01-23T12:00:00",
+        "success_probability": 87.79000091552734,
+        "day_of_week": 4,
+        "hour": 12,
+        "period": "Afternoon",
+        "risk_score": 12.210000038146973,
+        "risk_reasons": "",
+        "day_name": "Friday"
+      },
+      {
+        "date": "2026-01-23",
+        "slot": "13-14",
+        "datetime": "2026-01-23T13:00:00",
+        "success_probability": 86.79000091552734,
+        "day_of_week": 4,
+        "hour": 13,
+        "period": "Afternoon",
+        "risk_score": 13.210000038146973,
+        "risk_reasons": "",
+        "day_name": "Friday"
+      },
+      {
+        "date": "2026-01-23",
+        "slot": "14-15",
+        "datetime": "2026-01-23T14:00:00",
+        "success_probability": 86.08000183105469,
+        "day_of_week": 4,
+        "hour": 14,
+        "period": "Afternoon",
+        "risk_score": 13.920000076293945,
+        "risk_reasons": "",
+        "day_name": "Friday"
+      },
+      {
+        "date": "2026-01-23",
+        "slot": "15-16",
+        "datetime": "2026-01-23T15:00:00",
+        "success_probability": 86.7699966430664,
+        "day_of_week": 4,
+        "hour": 15,
+        "period": "Afternoon",
+        "risk_score": 13.229999542236328,
+        "risk_reasons": "",
+        "day_name": "Friday"
+      },
+      {
+        "date": "2026-01-23",
+        "slot": "16-17",
+        "datetime": "2026-01-23T16:00:00",
+        "success_probability": 86.02999877929688,
+        "day_of_week": 4,
+        "hour": 16,
+        "period": "Afternoon",
+        "risk_score": 13.970000267028809,
+        "risk_reasons": "",
+        "day_name": "Friday"
+      },
+      {
+        "date": "2026-01-23",
+        "slot": "17-18",
+        "datetime": "2026-01-23T17:00:00",
+        "success_probability": 82.20999908447266,
+        "day_of_week": 4,
+        "hour": 17,
+        "period": "Evening",
+        "risk_score": 17.790000915527344,
+        "risk_reasons": "",
+        "day_name": "Friday"
+      }
+    ],
+    "2026-01-24": [
+      {
+        "date": "2026-01-24",
+        "slot": "10-11",
+        "datetime": "2026-01-24T10:00:00",
+        "success_probability": 97.66999816894531,
+        "day_of_week": 5,
+        "hour": 10,
+        "period": "Morning",
+        "risk_score": 2.3299999237060547,
+        "risk_reasons": "",
+        "day_name": "Saturday"
+      },
+      {
+        "date": "2026-01-24",
+        "slot": "11-12",
+        "datetime": "2026-01-24T11:00:00",
+        "success_probability": 83.81999969482422,
+        "day_of_week": 5,
+        "hour": 11,
+        "period": "Morning",
+        "risk_score": 16.18000030517578,
+        "risk_reasons": "",
+        "day_name": "Saturday"
+      },
+      {
+        "date": "2026-01-24",
+        "slot": "12-13",
+        "datetime": "2026-01-24T12:00:00",
+        "success_probability": 82.56999969482422,
+        "day_of_week": 5,
+        "hour": 12,
+        "period": "Afternoon",
+        "risk_score": 17.43000030517578,
+        "risk_reasons": "",
+        "day_name": "Saturday"
+      },
+      {
+        "date": "2026-01-24",
+        "slot": "13-14",
+        "datetime": "2026-01-24T13:00:00",
+        "success_probability": 81.80000305175781,
+        "day_of_week": 5,
+        "hour": 13,
+        "period": "Afternoon",
+        "risk_score": 18.200000762939453,
+        "risk_reasons": [
+          "Severe Traffic Congestion",
+          "Slightly Adverse Weather",
+          "Weekend Delivery"
+        ],
+        "day_name": "Saturday"
+      },
+      {
+        "date": "2026-01-24",
+        "slot": "14-15",
+        "datetime": "2026-01-24T14:00:00",
+        "success_probability": 81.45999908447266,
+        "day_of_week": 5,
+        "hour": 14,
+        "period": "Afternoon",
+        "risk_score": 18.540000915527344,
+        "risk_reasons": [
+          "Moderate Traffic",
+          "Slightly Adverse Weather",
+          "Weekend Delivery"
+        ],
+        "day_name": "Saturday"
+      },
+      {
+        "date": "2026-01-24",
+        "slot": "15-16",
+        "datetime": "2026-01-24T15:00:00",
+        "success_probability": 82.41000366210938,
+        "day_of_week": 5,
+        "hour": 15,
+        "period": "Afternoon",
+        "risk_score": 17.59000015258789,
+        "risk_reasons": "",
+        "day_name": "Saturday"
+      },
+      {
+        "date": "2026-01-24",
+        "slot": "16-17",
+        "datetime": "2026-01-24T16:00:00",
+        "success_probability": 81.41000366210938,
+        "day_of_week": 5,
+        "hour": 16,
+        "period": "Afternoon",
+        "risk_score": 18.59000015258789,
+        "risk_reasons": [
+          "High Traffic Conditions",
+          "Slightly Adverse Weather",
+          "Weekend Delivery"
+        ],
+        "day_name": "Saturday"
+      },
+      {
+        "date": "2026-01-24",
+        "slot": "21-22",
+        "datetime": "2026-01-24T21:00:00",
+        "success_probability": 77.6500015258789,
+        "day_of_week": 5,
+        "hour": 21,
+        "period": "Night",
+        "risk_score": 22.350000381469727,
+        "risk_reasons": [
+          "Severe Traffic Congestion",
+          "Slightly Adverse Weather",
+          "Late Night Delivery (21.0:00)",
+          "Weekend Delivery"
+        ],
+        "day_name": "Saturday"
+      }
+    ],
+    "2026-01-25": [
+      {
+        "date": "2026-01-25",
+        "slot": "10-11",
+        "datetime": "2026-01-25T10:00:00",
+        "success_probability": 98.87999725341797,
+        "day_of_week": 6,
+        "hour": 10,
+        "period": "Morning",
+        "risk_score": 1.1200000047683716,
+        "risk_reasons": "",
+        "day_name": "Sunday"
+      },
+      {
+        "date": "2026-01-25",
+        "slot": "11-12",
+        "datetime": "2026-01-25T11:00:00",
+        "success_probability": 88.62999725341797,
+        "day_of_week": 6,
+        "hour": 11,
+        "period": "Morning",
+        "risk_score": 11.369999885559082,
+        "risk_reasons": "",
+        "day_name": "Sunday"
+      },
+      {
+        "date": "2026-01-25",
+        "slot": "12-13",
+        "datetime": "2026-01-25T12:00:00",
+        "success_probability": 87.79000091552734,
+        "day_of_week": 6,
+        "hour": 12,
+        "period": "Afternoon",
+        "risk_score": 12.210000038146973,
+        "risk_reasons": "",
+        "day_name": "Sunday"
+      },
+      {
+        "date": "2026-01-25",
+        "slot": "13-14",
+        "datetime": "2026-01-25T13:00:00",
+        "success_probability": 86.79000091552734,
+        "day_of_week": 6,
+        "hour": 13,
+        "period": "Afternoon",
+        "risk_score": 13.210000038146973,
+        "risk_reasons": "",
+        "day_name": "Sunday"
+      },
+      {
+        "date": "2026-01-25",
+        "slot": "14-15",
+        "datetime": "2026-01-25T14:00:00",
+        "success_probability": 86.08000183105469,
+        "day_of_week": 6,
+        "hour": 14,
+        "period": "Afternoon",
+        "risk_score": 13.920000076293945,
+        "risk_reasons": "",
+        "day_name": "Sunday"
+      },
+      {
+        "date": "2026-01-25",
+        "slot": "15-16",
+        "datetime": "2026-01-25T15:00:00",
+        "success_probability": 86.7699966430664,
+        "day_of_week": 6,
+        "hour": 15,
+        "period": "Afternoon",
+        "risk_score": 13.229999542236328,
+        "risk_reasons": "",
+        "day_name": "Sunday"
+      },
+      {
+        "date": "2026-01-25",
+        "slot": "16-17",
+        "datetime": "2026-01-25T16:00:00",
+        "success_probability": 86.02999877929688,
+        "day_of_week": 6,
+        "hour": 16,
+        "period": "Afternoon",
+        "risk_score": 13.970000267028809,
+        "risk_reasons": "",
+        "day_name": "Sunday"
+      },
+      {
+        "date": "2026-01-25",
+        "slot": "17-18",
+        "datetime": "2026-01-25T17:00:00",
+        "success_probability": 82.20999908447266,
+        "day_of_week": 6,
+        "hour": 17,
+        "period": "Evening",
+        "risk_score": 17.790000915527344,
+        "risk_reasons": "",
+        "day_name": "Sunday"
+      }
+    ],
+    "2026-01-26": [
+      {
+        "date": "2026-01-26",
+        "slot": "10-11",
+        "datetime": "2026-01-26T10:00:00",
+        "success_probability": 98.87999725341797,
+        "day_of_week": 0,
+        "hour": 10,
+        "period": "Morning",
+        "risk_score": 1.1200000047683716,
+        "risk_reasons": "",
+        "day_name": "Monday"
+      },
+      {
+        "date": "2026-01-26",
+        "slot": "11-12",
+        "datetime": "2026-01-26T11:00:00",
+        "success_probability": 88.69000244140625,
+        "day_of_week": 0,
+        "hour": 11,
+        "period": "Morning",
+        "risk_score": 11.3100004196167,
+        "risk_reasons": "",
+        "day_name": "Monday"
+      },
+      {
+        "date": "2026-01-26",
+        "slot": "12-13",
+        "datetime": "2026-01-26T12:00:00",
+        "success_probability": 87.8499984741211,
+        "day_of_week": 0,
+        "hour": 12,
+        "period": "Afternoon",
+        "risk_score": 12.149999618530273,
+        "risk_reasons": "",
+        "day_name": "Monday"
+      },
+      {
+        "date": "2026-01-26",
+        "slot": "13-14",
+        "datetime": "2026-01-26T13:00:00",
+        "success_probability": 86.8499984741211,
+        "day_of_week": 0,
+        "hour": 13,
+        "period": "Afternoon",
+        "risk_score": 13.149999618530273,
+        "risk_reasons": "",
+        "day_name": "Monday"
+      },
+      {
+        "date": "2026-01-26",
+        "slot": "14-15",
+        "datetime": "2026-01-26T14:00:00",
+        "success_probability": 86.13999938964844,
+        "day_of_week": 0,
+        "hour": 14,
+        "period": "Afternoon",
+        "risk_score": 13.859999656677246,
+        "risk_reasons": "",
+        "day_name": "Monday"
+      },
+      {
+        "date": "2026-01-26",
+        "slot": "15-16",
+        "datetime": "2026-01-26T15:00:00",
+        "success_probability": 86.81999969482422,
+        "day_of_week": 0,
+        "hour": 15,
+        "period": "Afternoon",
+        "risk_score": 13.180000305175781,
+        "risk_reasons": "",
+        "day_name": "Monday"
+      },
+      {
+        "date": "2026-01-26",
+        "slot": "16-17",
+        "datetime": "2026-01-26T16:00:00",
+        "success_probability": 86.08999633789062,
+        "day_of_week": 0,
+        "hour": 16,
+        "period": "Afternoon",
+        "risk_score": 13.90999984741211,
+        "risk_reasons": "",
+        "day_name": "Monday"
+      },
+      {
+        "date": "2026-01-26",
+        "slot": "17-18",
+        "datetime": "2026-01-26T17:00:00",
+        "success_probability": 82.2699966430664,
+        "day_of_week": 0,
+        "hour": 17,
+        "period": "Evening",
+        "risk_score": 17.729999542236328,
+        "risk_reasons": "",
+        "day_name": "Monday"
+      }
+    ],
+    "2026-01-27": [
+      {
+        "date": "2026-01-27",
+        "slot": "10-11",
+        "datetime": "2026-01-27T10:00:00",
+        "success_probability": 93.02999877929688,
+        "day_of_week": 1,
+        "hour": 10,
+        "period": "Morning",
+        "risk_score": 6.96999979019165,
+        "risk_reasons": "",
+        "day_name": "Tuesday"
+      },
+      {
+        "date": "2026-01-27",
+        "slot": "11-12",
+        "datetime": "2026-01-27T11:00:00",
+        "success_probability": 75.61000061035156,
+        "day_of_week": 1,
+        "hour": 11,
+        "period": "Morning",
+        "risk_score": 24.389999389648438,
+        "risk_reasons": [
+          "Moderate Traffic",
+          "Unfavorable Weather Conditions"
+        ],
+        "day_name": "Tuesday"
+      },
+      {
+        "date": "2026-01-27",
+        "slot": "12-13",
+        "datetime": "2026-01-27T12:00:00",
+        "success_probability": 74.44999694824219,
+        "day_of_week": 1,
+        "hour": 12,
+        "period": "Afternoon",
+        "risk_score": 25.549999237060547,
+        "risk_reasons": [
+          "Severe Traffic Congestion",
+          "Unfavorable Weather Conditions"
+        ],
+        "day_name": "Tuesday"
+      },
+      {
+        "date": "2026-01-27",
+        "slot": "13-14",
+        "datetime": "2026-01-27T13:00:00",
+        "success_probability": 73.38999938964844,
+        "day_of_week": 1,
+        "hour": 13,
+        "period": "Afternoon",
+        "risk_score": 26.610000610351562,
+        "risk_reasons": [
+          "Severe Traffic Congestion",
+          "Unfavorable Weather Conditions"
+        ],
+        "day_name": "Tuesday"
+      },
+      {
+        "date": "2026-01-27",
+        "slot": "14-15",
+        "datetime": "2026-01-27T14:00:00",
+        "success_probability": 72.70999908447266,
+        "day_of_week": 1,
+        "hour": 14,
+        "period": "Afternoon",
+        "risk_score": 27.290000915527344,
+        "risk_reasons": [
+          "Moderate Traffic",
+          "Unfavorable Weather Conditions"
+        ],
+        "day_name": "Tuesday"
+      },
+      {
+        "date": "2026-01-27",
+        "slot": "15-16",
+        "datetime": "2026-01-27T15:00:00",
+        "success_probability": 73.41999816894531,
+        "day_of_week": 1,
+        "hour": 15,
+        "period": "Afternoon",
+        "risk_score": 26.579999923706055,
+        "risk_reasons": [
+          "Moderate Traffic",
+          "Unfavorable Weather Conditions"
+        ],
+        "day_name": "Tuesday"
+      },
+      {
+        "date": "2026-01-27",
+        "slot": "16-17",
+        "datetime": "2026-01-27T16:00:00",
+        "success_probability": 72.66000366210938,
+        "day_of_week": 1,
+        "hour": 16,
+        "period": "Afternoon",
+        "risk_score": 27.34000015258789,
+        "risk_reasons": [
+          "High Traffic Conditions",
+          "Unfavorable Weather Conditions"
+        ],
+        "day_name": "Tuesday"
+      },
+      {
+        "date": "2026-01-27",
+        "slot": "17-18",
+        "datetime": "2026-01-27T17:00:00",
+        "success_probability": 70.37999725341797,
+        "day_of_week": 1,
+        "hour": 17,
+        "period": "Evening",
+        "risk_score": 29.6200008392334,
+        "risk_reasons": [
+          "High Traffic Conditions",
+          "Unfavorable Weather Conditions"
+        ],
+        "day_name": "Tuesday"
+      }
+    ]
+  },
+  "message": "Successfully generated top 8 recommendations for 7 days (56 total slots)"
+}

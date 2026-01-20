@@ -92,8 +92,16 @@ def recommend_delivery_slots(
             store_longitude = delivery_location[1]
             print(f"⚠️  Store coordinates not provided. Using delivery location as proxy.")
         
-        # Initialize recommender
-        recommender = SlotRecommender(model_path)
+        # Global cache for recommender
+        global _global_recommender
+        if '_global_recommender' not in globals():
+            _global_recommender = None
+
+        if _global_recommender is None:
+            print(f"Loading model from {model_path}...")
+            _global_recommender = SlotRecommender(model_path)
+        
+        recommender = _global_recommender
         
         # Generate recommendations (returns dict by date)
         recommendations_by_date = recommender.recommend_slots(

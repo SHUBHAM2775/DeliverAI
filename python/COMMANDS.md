@@ -28,6 +28,15 @@ python call_api_example.py
 python api.py
 ```
 
+### 6. Run FastAPI Server for Slot Recommendations (GET /api/slots/recommend/{uuid})
+From the `python` folder (Next.js rewrites `/api/slots/recommend/:uuid` to this server):
+```powershell
+pip install -r requirements.txt -r fastapi_requirements.txt
+python fastapi_server.py
+# OR: uvicorn fastapi_server:app --reload --host 127.0.0.1 --port 8000
+```
+Requires: MongoDB (MONGODB_URI), `delivery_slot_model.pkl`. Next.js `next.config.ts` proxies `/api/slots/recommend/:uuid` to `http://localhost:8000`.
+
 ---
 
 ## 📋 Step-by-Step Execution

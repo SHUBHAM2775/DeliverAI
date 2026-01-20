@@ -1,0 +1,6 @@
+# Dependencies for fastapi_server.py (GET /api/slots/recommend/{uuid})
+# Also install python/requirements.txt for ML (pandas, xgboost, scikit-learn, geopy, api.py).
+fastapi>=0.100.0
+uvicorn[standard]>=0.22.0
+pymongo>=4.0.0
+pydantic>=2.0.0
