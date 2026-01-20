@@ -1,7 +1,7 @@
 "use client";
 
 import Header from "@/components/Header";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // Icons components
 const ClockIcon = () => (
@@ -63,16 +63,26 @@ const getHeatmapColor = (color: string) => {
     }
 };
 
-// Slot configuration data
-const initialSlots = [
-    { id: 1, name: "Early Morning", time: "6:00 - 8:00 AM", demand: 45, capacity: 60, active: true, aiPreferred: false },
-    { id: 2, name: "Morning Rush", time: "9:00 - 11:00 AM", demand: 85, capacity: 80, active: true, aiPreferred: true },
-    { id: 3, name: "Midday", time: "11:00 AM - 1:00 PM", demand: 70, capacity: 75, active: true, aiPreferred: true },
-    { id: 4, name: "Afternoon", time: "1:00 - 3:00 PM", demand: 55, capacity: 70, active: true, aiPreferred: false },
-    { id: 5, name: "Late Afternoon", time: "3:00 - 5:00 PM", demand: 65, capacity: 65, active: true, aiPreferred: false },
-    { id: 6, name: "Evening Peak", time: "5:00 - 7:00 PM", demand: 95, capacity: 85, active: true, aiPreferred: true },
-    { id: 7, name: "Night", time: "7:00 - 9:00 PM", demand: 40, capacity: 50, active: true, aiPreferred: false },
-    { id: 8, name: "Late Night", time: "9:00 - 11:00 PM", demand: 20, capacity: 30, active: false, aiPreferred: false },
+type SlotInfo = {
+    id: string;
+    name: string;
+    time: string;
+    demand: number;
+    capacity: number;
+    active: boolean;
+    aiPreferred: boolean;
+    bookedCount: number;
+    successProbability: number;
+    riskLevel?: string;
+    area?: string;
+};
+
+// Slot configuration fallback data
+const initialSlots: SlotInfo[] = [
+    { id: "fallback-1", name: "Early Morning", time: "6:00 - 8:00 AM", demand: 45, capacity: 60, active: true, aiPreferred: false, bookedCount: 30, successProbability: 89 },
+    { id: "fallback-2", name: "Morning Rush", time: "9:00 - 11:00 AM", demand: 85, capacity: 80, active: true, aiPreferred: true, bookedCount: 70, successProbability: 94 },
+    { id: "fallback-3", name: "Midday", time: "11:00 AM - 1:00 PM", demand: 70, capacity: 75, active: true, aiPreferred: true, bookedCount: 52, successProbability: 92 },
+    { id: "fallback-4", name: "Afternoon", time: "1:00 - 3:00 PM", demand: 55, capacity: 70, active: true, aiPreferred: false, bookedCount: 40, successProbability: 88 },
 ];
 
 // AI Recommendations data
@@ -83,7 +93,49 @@ const recommendations = [
 ];
 
 export default function SlotIntelligencePage() {
-    const [slots, setSlots] = useState(initialSlots);
+    const [slots, setSlots] = useState<SlotInfo[]>(initialSlots);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchSlots = async () => {
+            try {
+                const res = await fetch("/api/admin_apis/slots/intelligence", { cache: "no-store" });
+                if (!res.ok) throw new Error("Failed to load slots");
+                const json = await res.json();
+                if (isMounted && Array.isArray(json?.data)) {
+                    const mapped: SlotInfo[] = json.data.map((slot: any, index: number) => {
+                        const successValue = typeof slot.successProbability === "string" ? Number(slot.successProbability.replace("%", "")) : Number(slot.successProbability ?? 0);
+                        const capacityPct = slot.capacity ? Math.min(100, Math.round((slot.bookedCount / slot.capacity) * 100)) : 0;
+                        return {
+                            id: slot.slotId?.toString() || `slot-${index}`,
+                            name: slot.area || "Slot",
+                            time: slot.timeRange || "-",
+                            demand: capacityPct,
+                            capacity: slot.capacity ?? 0,
+                            active: (slot.capacity ?? 0) === 0 ? false : slot.bookedCount < slot.capacity,
+                            aiPreferred: Boolean(slot.isAiRecommended),
+                            bookedCount: slot.bookedCount ?? 0,
+                            successProbability: Number.isFinite(successValue) ? successValue : 0,
+                            riskLevel: slot.riskLevel,
+                            area: slot.area,
+                        };
+                    });
+                    setSlots(mapped);
+                }
+            } catch (err) {
+                console.error("Slot intelligence fetch failed", err);
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
+        fetchSlots();
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const toggleSlotActive = (id: number) => {
         setSlots(slots.map(slot =>
@@ -99,6 +151,18 @@ export default function SlotIntelligencePage() {
 
     const activeSlots = slots.filter(slot => slot.active).length;
     const aiPreferredCount = slots.filter(slot => slot.aiPreferred).length;
+    const avgSuccess = slots.length
+        ? (slots.reduce((sum, slot) => sum + slot.successProbability, 0) / slots.length).toFixed(1)
+        : "--";
+    const capacityUsed = slots.length
+        ? Math.min(
+            100,
+            (
+                slots.reduce((sum, slot) => sum + Math.min(slot.bookedCount, slot.capacity), 0) /
+                slots.reduce((sum, slot) => sum + (slot.capacity || 0), 0 || 1)
+            ) * 100
+          ).toFixed(0)
+        : "--";
 
     return (
         <div className="flex-1 overflow-y-auto">
@@ -133,7 +197,7 @@ export default function SlotIntelligencePage() {
                             <TrendingUpIcon />
                             <span className="text-gray-700 font-medium">Avg Success</span>
                         </div>
-                        <div className="text-4xl font-bold text-gray-900">89.3%</div>
+                        <div className="text-4xl font-bold text-gray-900">{avgSuccess}%</div>
                         <div className="text-gray-500 text-sm">across all slots</div>
                     </div>
 
@@ -143,7 +207,7 @@ export default function SlotIntelligencePage() {
                             <UsersIcon />
                             <span className="text-gray-700 font-medium">Capacity Used</span>
                         </div>
-                        <div className="text-4xl font-bold text-gray-900">78%</div>
+                        <div className="text-4xl font-bold text-gray-900">{capacityUsed}%</div>
                         <div className="text-gray-500 text-sm">average utilization</div>
                     </div>
                 </div>
@@ -255,27 +319,26 @@ export default function SlotIntelligencePage() {
                                 {/* Demand */}
                                 <div className="mb-3">
                                     <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-gray-500">Demand</span>
-                                        <span className="text-gray-700">{slot.demand}%</span>
+                                        <span className="text-gray-500">Booked</span>
+                                        <span className="text-gray-700">{slot.bookedCount}</span>
                                     </div>
                                     <div className="w-full bg-gray-200 rounded-full h-2">
                                         <div
                                             className="bg-blue-600 h-2 rounded-full"
-                                            style={{ width: `${slot.demand}%` }}
+                                            style={{ width: `${Math.min(100, slot.demand)}%` }}
                                         />
                                     </div>
                                 </div>
 
-                                {/* Capacity */}
                                 <div className="mb-4">
                                     <div className="flex justify-between text-sm mb-1">
                                         <span className="text-gray-500">Capacity</span>
-                                        <span className="text-gray-700">{slot.capacity}%</span>
+                                        <span className="text-gray-700">{slot.capacity}</span>
                                     </div>
                                     <div className="w-full bg-gray-200 rounded-full h-2">
                                         <div
                                             className="bg-emerald-500 h-2 rounded-full"
-                                            style={{ width: `${slot.capacity}%` }}
+                                            style={{ width: `${slot.capacity ? Math.min(100, Math.round((slot.bookedCount / slot.capacity) * 100)) : 0}%` }}
                                         />
                                     </div>
                                 </div>

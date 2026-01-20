@@ -6,8 +6,53 @@ import {
   ClockIcon,
   ShieldExclamationIcon,
 } from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
+
+type OverviewMetrics = {
+  totalOrdersToday: number;
+  firstAttemptSuccessPercentage: string;
+  failedDeliveriesToday: number;
+  avgDeliveryDelay: string;
+  highRiskDeliveriesCount: number;
+  activeDeliveryZones: string[];
+};
+
+const DEFAULT_METRICS: OverviewMetrics = {
+  totalOrdersToday: 0,
+  firstAttemptSuccessPercentage: "0%",
+  failedDeliveriesToday: 0,
+  avgDeliveryDelay: "N/A",
+  highRiskDeliveriesCount: 0,
+  activeDeliveryZones: [],
+};
 
 export default function OverviewPage() {
+  const [metrics, setMetrics] = useState<OverviewMetrics>(DEFAULT_METRICS);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchMetrics = async () => {
+      try {
+        const res = await fetch("/api/admin_apis/dashboard/overview", { cache: "no-store" });
+        if (!res.ok) throw new Error("Failed to load overview metrics");
+        const json = await res.json();
+        if (isMounted && json?.data) {
+          setMetrics(json.data as OverviewMetrics);
+        }
+      } catch (err) {
+        console.error("Overview fetch failed", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchMetrics();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div className="flex-1 overflow-y-auto bg-gray-50">
       <div className="p-6 min-h-full">
@@ -33,7 +78,9 @@ export default function OverviewPage() {
                 ↗ 12.5%
               </span>
             </div>
-            <p className="text-3xl font-bold text-gray-900 mb-1">1,247</p>
+            <p className="text-3xl font-bold text-gray-900 mb-1">
+              {loading ? "--" : metrics.totalOrdersToday}
+            </p>
             <p className="text-gray-500 text-xs mb-0.5">Total Orders Today</p>
             <p className="text-xs text-gray-400">vs yesterday</p>
           </div>
@@ -48,7 +95,9 @@ export default function OverviewPage() {
                 ↗ 3.8%
               </span>
             </div>
-            <p className="text-3xl font-bold text-gray-900 mb-1">94.2%</p>
+            <p className="text-3xl font-bold text-gray-900 mb-1">
+              {loading ? "--" : metrics.firstAttemptSuccessPercentage}
+            </p>
             <p className="text-gray-500 text-xs mb-0.5">First Attempt Success</p>
             <p className="text-xs text-gray-400">vs last week</p>
           </div>
@@ -63,7 +112,9 @@ export default function OverviewPage() {
                 ↘ 8.2%
               </span>
             </div>
-            <p className="text-3xl font-bold text-gray-900 mb-1">28 min</p>
+            <p className="text-3xl font-bold text-gray-900 mb-1">
+              {loading ? "--" : metrics.avgDeliveryDelay}
+            </p>
             <p className="text-gray-500 text-xs mb-0.5">Avg Delivery Time</p>
             <p className="text-xs text-gray-400">faster than target</p>
           </div>
@@ -78,7 +129,9 @@ export default function OverviewPage() {
                 ↗ 15.3%
               </span>
             </div>
-            <p className="text-3xl font-bold text-gray-900 mb-1">23</p>
+            <p className="text-3xl font-bold text-gray-900 mb-1">
+              {loading ? "--" : metrics.highRiskDeliveriesCount}
+            </p>
             <p className="text-gray-500 text-xs mb-0.5">High-Risk Deliveries</p>
             <p className="text-xs text-gray-400">predicted issues</p>
           </div>
