@@ -10,7 +10,7 @@ import {
     FireIcon,
     ClockIcon,
 } from "@heroicons/react/24/outline";
-import ProfileDropdown from "@/components/ProfileDropdown";
+import ReceiverHeader from "@/components/ReceiverHeader";
 
 // Time slots data
 const timeSlots = [
@@ -68,6 +68,7 @@ export default function SlotSelectionPage() {
     return (
         <div className="flex-1 overflow-y-auto bg-gray-50">
             <div className="p-8 min-h-full">
+                <ReceiverHeader title="Slot Selection" subtitle="Align on delivery time" />
                 <div className="grid grid-cols-3 gap-6">
                     {/* Left Column - Order Details */}
                     <div className="col-span-2 space-y-6">

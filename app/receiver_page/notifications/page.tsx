@@ -14,6 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 import { StarIcon as StarIconOutline } from "@heroicons/react/24/outline";
+import ReceiverHeader from "@/components/ReceiverHeader";
 
 const availableSlots = [
     { time: "8:00 - 11:00 AM", rate: 88, badge: "AI Pick" },
@@ -50,8 +51,7 @@ export default function NotificationsPage() {
     return (
         <div className="flex-1 overflow-y-auto bg-gray-50">
             <div className="p-8 min-h-full">
-                {/* Header */}
-                <h1 className="text-2xl font-bold text-gray-900 mb-8">Notifications</h1>
+                <ReceiverHeader title="Notifications" subtitle="Stay in sync with deliveries" />
 
                 {/* Tabs */}
                 <div className="flex gap-3 mb-8">
