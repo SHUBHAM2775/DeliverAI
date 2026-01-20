@@ -10,15 +10,16 @@ import {
     BellIcon,
     DocumentChartBarIcon,
     UserCircleIcon,
+    ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 
 const menuItems = [
     { name: "Dashboard", href: "/driver_page", icon: Squares2X2Icon },
-    { name: "Assigned Deliveries", href: "/driver_page/deliveries", icon: TruckIcon },
     { name: "Route Timeline", href: "/driver_page/route", icon: MapIcon },
+    { name: "Assigned Deliveries", href: "/driver_page/deliveries", icon: TruckIcon },
     { name: "Notifications", href: "/driver_page/notifications", icon: BellIcon },
-    { name: "Daily Summary", href: "/driver_page/summary", icon: DocumentChartBarIcon },
     { name: "Profile", href: "/driver_page/profile", icon: UserCircleIcon },
+    { name: "Emergency SOS", href: "/driver_page/emergency", icon: ExclamationTriangleIcon },
 ];
 
 export default function DriverSidebar() {

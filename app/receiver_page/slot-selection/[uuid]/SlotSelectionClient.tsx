@@ -50,15 +50,17 @@ const timeSlots = [
     { time: "10:00 - 11:00 PM", rate: 18, color: "bg-[#FECACA]", textColor: "text-red-700", badge: null },
 ];
 
-// Generate 7 days window
+// Generate 7 days window starting 3 days from today
+// This provides a buffer period for damage recovery when accessed via emergency reschedule emails
 const generateDaysWindow = () => {
     const days = [];
     const today = new Date();
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const bufferDays = 3; // 3-day buffer for sender to recover from disruptions
 
     for (let i = 0; i < 7; i++) {
         const date = new Date(today);
-        date.setDate(today.getDate() + i);
+        date.setDate(today.getDate() + bufferDays + i); // Start 3 days later
         days.push({
             dayName: dayNames[date.getDay()],
             date: date.getDate(),

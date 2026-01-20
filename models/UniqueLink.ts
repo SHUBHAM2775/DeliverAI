@@ -36,10 +36,6 @@ const uniqueLinkSchema = new Schema<UniqueLink>(
   { timestamps: true, collection: "unique_links" },
 );
 
-// Index for faster lookups
-uniqueLinkSchema.index({ uuid: 1 });
-uniqueLinkSchema.index({ orderId: 1 });
-
 const UniqueLinkModel = models.UniqueLink || model<UniqueLink>("UniqueLink", uniqueLinkSchema);
 
 export default UniqueLinkModel;

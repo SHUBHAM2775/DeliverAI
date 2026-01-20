@@ -1,8 +1,8 @@
 import { Schema, model, models, Document, Types } from "mongoose";
 
-interface GeoLocation {
-  latitude: number;
-  longitude: number;
+interface Location {
+  lat: number;
+  lng: number;
 }
 
 export interface Order extends Document {
@@ -15,13 +15,13 @@ export interface Order extends Document {
   quantity?: string;
   isFragile: boolean;
   imageUrl?: string;
-  pickupLocation?: GeoLocation;
-  deliveryAddress: GeoLocation;
+  pickupLocation?: Location;
+  deliveryAddress: string;
   area: string;
   pincode: string;
   workingStartTime?: string;
   workingEndTime?: string;
-  geoLocation?: GeoLocation;
+  deliveryLocation?: Location;
   orderStatus: "CREATED" | "CONFIRMED" | "DELIVERED" | "FAILED";
   deliveryDate?: Date;
   finalSlotId?: Types.ObjectId;
@@ -32,10 +32,10 @@ export interface Order extends Document {
   createdAt?: Date;
 }
 
-const geoLocationSchema = new Schema<GeoLocation>(
+const locationSchema = new Schema<Location>(
   {
-    latitude: { type: Number, required: true },
-    longitude: { type: Number, required: true },
+    lat: { type: Number, required: true },
+    lng: { type: Number, required: true },
   },
   { _id: false },
 );
@@ -51,13 +51,13 @@ const orderSchema = new Schema<Order>(
     quantity: { type: String },
     isFragile: { type: Boolean, default: false },
     imageUrl: { type: String },
-    pickupLocation: { type: geoLocationSchema },
-    deliveryAddress: { type: geoLocationSchema, required: true },
+    pickupLocation: { type: locationSchema, default: null },
+    deliveryAddress: { type: String, required: true },
     area: { type: String, required: true },
     pincode: { type: String, required: true },
     workingStartTime: { type: String },
     workingEndTime: { type: String },
-    geoLocation: { type: geoLocationSchema },
+    deliveryLocation: { type: locationSchema, default: null },
     orderStatus: {
       type: String,
       enum: ["CREATED", "CONFIRMED", "DELIVERED", "FAILED"],

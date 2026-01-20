@@ -94,7 +94,7 @@ export default function NotificationPage() {
                             <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">1</span>
                         </button>
                         <div 
-                            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition relative"
+                            className="flex items-center gap-3 cursor-pointer transition relative"
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
                         >
                             <span className="text-sm font-medium text-gray-700">Rahul Sharma</span>

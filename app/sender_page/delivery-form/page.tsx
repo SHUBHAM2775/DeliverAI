@@ -56,8 +56,8 @@ export default function DeliveryFormPage() {
     const [isFragile, setIsFragile] = useState(false);
     const [itemImage, setItemImage] = useState<File | null>(null);
 
-    const [pickupLat, setPickupLat] = useState("");
-    const [pickupLng, setPickupLng] = useState("");
+    const [senderLat, setSenderLat] = useState("");
+    const [senderLng, setSenderLng] = useState("");
     const [locStatus, setLocStatus] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState("");
@@ -161,8 +161,8 @@ export default function DeliveryFormPage() {
                     description,
                     quantity,
                     isFragile,
-                    pickupLat,
-                    pickupLng,
+                    senderLat,
+                    senderLng,
                     imageBase64,
                     deliverySlots,
                 }),
@@ -194,8 +194,8 @@ export default function DeliveryFormPage() {
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 const { latitude, longitude } = pos.coords;
-                setPickupLat(latitude.toFixed(6));
-                setPickupLng(longitude.toFixed(6));
+                setSenderLat(latitude.toFixed(6));
+                setSenderLng(longitude.toFixed(6));
                 setLocStatus("Location captured.");
             },
             (err) => {
@@ -237,7 +237,7 @@ export default function DeliveryFormPage() {
                             <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center">1</span>
                         </button>
                         <div 
-                            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition relative"
+                            className="flex items-center gap-2 cursor-pointer transition relative"
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
                         >
                             <span className="text-sm font-medium text-gray-700">Rahul Sharma</span>
@@ -296,7 +296,7 @@ export default function DeliveryFormPage() {
                                         <label className="block text-xs text-gray-500 mb-1">Latitude</label>
                                         <input
                                             type="text"
-                                            value={pickupLat}
+                                            value={senderLat}
                                             readOnly
                                             placeholder="--"
                                             className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700"
@@ -306,7 +306,7 @@ export default function DeliveryFormPage() {
                                         <label className="block text-xs text-gray-500 mb-1">Longitude</label>
                                         <input
                                             type="text"
-                                            value={pickupLng}
+                                            value={senderLng}
                                             readOnly
                                             placeholder="--"
                                             className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700"
