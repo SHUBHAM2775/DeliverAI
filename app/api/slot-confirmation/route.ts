@@ -102,8 +102,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Valid orderId is required' }, { status: 400 });
     }
 
-    // Validate ObjectId format
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    // Validate ObjectId format using imported Types
+    if (!Types.ObjectId.isValid(orderId)) {
       return NextResponse.json({ error: 'Invalid orderId format' }, { status: 400 });
     }
 
