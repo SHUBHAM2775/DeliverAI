@@ -116,16 +116,20 @@ def recommend_delivery_slots(
         for date_str, day_slots in recommendations_by_date.items():
             formatted_day_slots = []
             for rec in day_slots:
+                risk_score = rec.get('risk_score', 0.0)
+                # Only include risk_reasons if risk_score > 18, otherwise empty string
+                risk_reasons = rec.get('risk_reasons', []) if risk_score > 18 else ""
+                
                 formatted_day_slots.append({
                     'date': str(rec['date']),
                     'slot': rec['slot'],
                     'datetime': rec['datetime'].isoformat(),
-                    'success_probability': float(rec['success_probability']),
+                    'success_probability': float(round(rec['success_probability'] * 100, 2)),  # Convert to percentage
                     'day_of_week': int(rec['day_of_week']),
                     'hour': int(rec['hour']),
                     'period': get_time_period(rec['hour']),
-                    'risk_score': rec.get('risk_score', 0.0),
-                    'risk_reasons': rec.get('risk_reasons', []),
+                    'risk_score': risk_score,
+                    'risk_reasons': risk_reasons,
                     'day_name': rec['datetime'].strftime('%A')
                 })
             formatted_recommendations_by_date[date_str] = formatted_day_slots
@@ -171,7 +175,7 @@ def print_recommendations(result: Dict):
             print("-" * 70)
             
             for i, rec in enumerate(day_slots, 1):
-                success_prob = rec['success_probability'] * 100
+                success_prob = rec['success_probability']  # Already in percentage format
                 risk_score = rec.get('risk_score', 0.0)
                 reasons = rec.get('risk_reasons', [])
                 
