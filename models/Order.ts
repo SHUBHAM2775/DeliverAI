@@ -1,8 +1,8 @@
 import { Schema, model, models, Document, Types } from "mongoose";
 
 interface GeoLocation {
-  latitude?: number;
-  longitude?: number;
+  latitude: number;
+  longitude: number;
 }
 
 export interface Order extends Document {
@@ -15,7 +15,8 @@ export interface Order extends Document {
   quantity?: string;
   isFragile: boolean;
   imageUrl?: string;
-  deliveryAddress: string;
+  pickupLocation?: GeoLocation;
+  deliveryAddress: GeoLocation;
   area: string;
   pincode: string;
   workingStartTime?: string;
@@ -33,8 +34,8 @@ export interface Order extends Document {
 
 const geoLocationSchema = new Schema<GeoLocation>(
   {
-    latitude: { type: Number },
-    longitude: { type: Number },
+    latitude: { type: Number, required: true },
+    longitude: { type: Number, required: true },
   },
   { _id: false },
 );
@@ -50,7 +51,8 @@ const orderSchema = new Schema<Order>(
     quantity: { type: String },
     isFragile: { type: Boolean, default: false },
     imageUrl: { type: String },
-    deliveryAddress: { type: String, required: true },
+    pickupLocation: { type: geoLocationSchema },
+    deliveryAddress: { type: geoLocationSchema, required: true },
     area: { type: String, required: true },
     pincode: { type: String, required: true },
     workingStartTime: { type: String },
