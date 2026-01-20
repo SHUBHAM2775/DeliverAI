@@ -64,7 +64,13 @@ async function getOrderByUuid(uuid: string): Promise<OrderData | null> {
 
     console.log(`Successfully fetched order for UUID: ${uuid}, orderId: ${order._id}`);
 
-    // Format order data
+    // Format order data (deliveryAddress as GeoLocation → use area, pincode for display)
+    const da = order.deliveryAddress as { latitude?: number; longitude?: number } | string | null;
+    const deliveryAddressDisplay =
+      typeof da === "string"
+        ? da
+        : [order.area, order.pincode].filter(Boolean).join(", ") || "Address on file";
+
     return {
       id: order._id.toString(),
       commodityName: order.commodityName,
@@ -73,7 +79,7 @@ async function getOrderByUuid(uuid: string): Promise<OrderData | null> {
       quantity: order.quantity,
       isFragile: order.isFragile,
       imageUrl: order.imageUrl,
-      deliveryAddress: order.deliveryAddress,
+      deliveryAddress: deliveryAddressDisplay,
       area: order.area,
       pincode: order.pincode,
       workingStartTime: order.workingStartTime,
