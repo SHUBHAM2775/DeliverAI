@@ -70,7 +70,7 @@ export async function geocodeAddress(
       };
     }
 
-    console.log(`✅ Geocoded address: "${address}" → (${lat}, ${lng})`);
+    // Geocoded successfully; return coordinates without verbose logging
 
     return {
       success: true,

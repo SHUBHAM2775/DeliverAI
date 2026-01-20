@@ -363,7 +363,8 @@ async function seed() {
         pickup_availability_window: "08:00-09:00",
         seller_allowed_time_range: "09:00-19:00",
         parcel_category: "Electronics",
-        delivery_location: { lat: 19.1197, lng: 72.8464 },
+        store_location: { latitude: 19.076, longitude: 72.8777 },
+        delivery_location: { latitude: 19.1197, longitude: 72.8464 },
       },
       {
         area: "Andheri",
@@ -373,7 +374,8 @@ async function seed() {
         pickup_availability_window: "10:00-12:00",
         seller_allowed_time_range: "09:00-19:00",
         parcel_category: "Books",
-        delivery_location: { lat: 19.1136, lng: 72.8697 },
+        store_location: { latitude: 19.076, longitude: 72.8777 },
+        delivery_location: { latitude: 19.1136, longitude: 72.8697 },
       },
       {
         area: "Andheri",
@@ -383,7 +385,8 @@ async function seed() {
         pickup_availability_window: "14:00-15:00",
         seller_allowed_time_range: "09:00-19:00",
         parcel_category: "Fragile",
-        delivery_location: { lat: 19.1075, lng: 72.8263 },
+        store_location: { latitude: 19.076, longitude: 72.8777 },
+        delivery_location: { latitude: 19.1075, longitude: 72.8263 },
       },
     ]);
     console.log("✅ Slot predictions created\n");
