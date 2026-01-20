@@ -16,7 +16,6 @@ import {
 const menuItems = [
     { name: "Overview", href: "/admin_page/overview", icon: Squares2X2Icon },
     { name: "Slot Intelligence", href: "/admin_page/slot-intelligence", icon: ClockIcon },
-    { name: "Route Planner", href: "/admin_page/route-planner", icon: MapIcon },
     { name: "Agents", href: "/admin_page/agents", icon: UserGroupIcon },
     { name: "Pre-Dispatch", href: "/admin_page/pre-dispatch", icon: PaperAirplaneIcon },
     { name: "Alerts", href: "/admin_page/alerts", icon: ExclamationTriangleIcon },
