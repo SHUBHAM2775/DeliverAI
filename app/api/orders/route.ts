@@ -181,8 +181,7 @@ export async function POST(req: Request) {
     // PART 1: ADDRESS GEOCODING
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    console.log("\n🌍 Starting address geocoding for order creation...");
-    console.log(`📍 Address to geocode: "${address}"`);
+    // Geocode delivery address
 
     const geocodingResult = await geocodeAddress(address);
 
@@ -194,20 +193,13 @@ export async function POST(req: Request) {
 
     const deliveryLocation =
       geocodingResult.success && geocodingResult.lat && geocodingResult.lng
-        ? {
-            lat: geocodingResult.lat,
-            lng: geocodingResult.lng,
-          }
+        ? { lat: geocodingResult.lat, lng: geocodingResult.lng }
         : null;
-
-    console.log("🔍 Geocoding result:", {
-      success: geocodingResult.success,
-      lat: geocodingResult.lat,
-      lng: geocodingResult.lng,
-      error: geocodingResult.error,
-    });
-    console.log("📦 Calculated deliveryLocation:", deliveryLocation);
-    console.log("📍 Address used for geocoding:", address);
+    if (deliveryLocation) {
+      console.log(
+        `📦 Delivery geocoded → (${deliveryLocation.lat}, ${deliveryLocation.lng})`,
+      );
+    }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // PART 2: PICKUP LOCATION (Sender's location)
@@ -222,9 +214,11 @@ export async function POST(req: Request) {
         : undefined;
 
     if (!pickupLocation) {
-      console.warn("⚠️  No pickup location (sender location) provided");
+      console.warn("⚠️  No pickup location provided");
     } else {
-      console.log(`📍 Pickup location: (${pickupLocation.lat}, ${pickupLocation.lng})`);
+      console.log(
+        `📍 Pickup → (${pickupLocation.lat}, ${pickupLocation.lng})`,
+      );
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -254,8 +248,7 @@ export async function POST(req: Request) {
 
     const confirmationUuid = uuidv4();
 
-    console.log("🔧 RIGHT BEFORE CREATE - deliveryLocation value:", deliveryLocation);
-    console.log("🔧 RIGHT BEFORE CREATE - typeof deliveryLocation:", typeof deliveryLocation);
+    // Create order payload
     
     const orderPayload = {
       senderId,
@@ -281,34 +274,17 @@ export async function POST(req: Request) {
       deliveryLocation: deliveryLocation, // NEW: Customer address geocoded to lat/long
     };
     
-    console.log("🔧 FULL PAYLOAD deliveryLocation:", orderPayload.deliveryLocation);
-    console.log("🔧 FULL PAYLOAD pickupLocation:", orderPayload.pickupLocation);
-
     const orderDoc = await OrderModel.create(orderPayload);
-
-    console.log("✅ Raw orderDoc from Mongoose:", JSON.stringify({
-      _id: orderDoc._id,
-      deliveryLocation: orderDoc.deliveryLocation,
-      pickupLocation: orderDoc.pickupLocation,
-      deliveryAddress: orderDoc.deliveryAddress,
-    }, null, 2));
-
-    console.log("✅ Order document saved with:", {
-      deliveryAddress: orderDoc.deliveryAddress,
-      deliveryLocation: orderDoc.deliveryLocation,
-      pickupLocation: orderDoc.pickupLocation,
-    });
+    console.log(
+      `✅ Order created ${orderDoc._id} — addr: ${orderDoc.deliveryAddress}`,
+    );
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // PART 4: DRIVER DISTANCE OPTIMIZATION
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     if (pickupLocation) {
-      console.log("\n🚚 Triggering driver distance optimization...");
-
-      const top5Drivers = await findTop5NearestDrivers(pickupLocation);
-
-      logTop5DriversToConsole(top5Drivers, pickupLocation);
+      await findTop5NearestDrivers(pickupLocation);
     } else {
       console.warn("\n⚠️  Driver optimization SKIPPED (no pickup location available)");
     }
@@ -324,10 +300,7 @@ export async function POST(req: Request) {
         orderId: orderDoc._id,
         isUsed: false,
       });
-      console.log("Unique link created", {
-        uuid: confirmationUuid,
-        orderId: orderDoc._id,
-      });
+      console.log("🔗 Unique link created");
     } catch (linkError) {
       console.error("Failed to create unique link", {
         uuid: confirmationUuid,

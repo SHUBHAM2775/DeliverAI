@@ -128,12 +128,7 @@ export async function sendDeliveryConfirmationEmail(
       html: htmlBody,
     });
 
-    console.log("Delivery confirmation email sent", {
-      to: toEmail,
-      messageId: info.messageId,
-      accepted: info.accepted,
-      rejected: info.rejected,
-    });
+    console.log(`📧 Delivery confirmation email sent to ${toEmail}`);
 
     return { success: true };
   } catch (error) {
@@ -234,12 +229,7 @@ export async function sendEmergencyAlertEmail(
       html: htmlBody,
     });
 
-    console.log("Emergency alert email sent", {
-      to: toEmail,
-      messageId: info.messageId,
-      accepted: info.accepted,
-      rejected: info.rejected,
-    });
+    console.log(`📧 Emergency alert email sent to ${toEmail}`);
 
     return { success: true };
   } catch (error) {
