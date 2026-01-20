@@ -365,6 +365,27 @@ async function seed() {
       type: "ALERT",
       message: "High risk on route. Check alternate paths.",
     },
+    {
+      userId: senderUser._id,
+      orderId: order1._id,
+      type: "REMINDER",
+      message: "Customer confirmed delivery slot for Wireless Headphones.",
+      isRead: false,
+    },
+    {
+      userId: senderUser._id,
+      orderId: order2._id,
+      type: "REMINDER",
+      message: "Books delivery is out for delivery.",
+      isRead: false,
+    },
+    {
+      userId: senderUser._id,
+      orderId: order3._id,
+      type: "ALERT",
+      message: "Glassware Set delivery failed. Customer unavailable.",
+      isRead: false,
+    },
   ]);
 
   await DeliveryFeedback.create([

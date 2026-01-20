@@ -30,6 +30,9 @@ export default function NotificationsPage() {
     const [selectedDate, setSelectedDate] = useState("");
     const [rating, setRating] = useState(0);
     const [feedback, setFeedback] = useState("");
+    const [wasConvenient, setWasConvenient] = useState<boolean | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+    const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
     const handleReschedule = () => {
         setActiveTab("reschedule");
@@ -43,8 +46,31 @@ export default function NotificationsPage() {
         router.push("/receiver_page/confirmation");
     };
 
-    const handleSubmitFeedback = () => {
-        router.push("/receiver_page/confirmation");
+    const handleSubmitFeedback = async () => {
+        setSubmitMessage(null);
+        try {
+            setSubmitting(true);
+            const res = await fetch("/api/feedback", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    rating,
+                    comment: feedback,
+                    wasConvenient,
+                }),
+            });
+            if (!res.ok) {
+                throw new Error("Failed to submit feedback");
+            }
+            setSubmitMessage("Feedback submitted successfully");
+            // Optionally navigate after success
+            router.push("/receiver_page/confirmation");
+        } catch (error) {
+            console.error(error);
+            setSubmitMessage("Could not submit feedback. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -286,13 +312,27 @@ export default function NotificationsPage() {
 
                             {/* Quick Buttons */}
                             <div className="flex gap-4 justify-center mb-8">
-                                <button className="px-8 py-3 bg-green-700 rounded-xl text-white font-semibold hover:bg-green-800 transition flex items-center gap-2">
+                                <button
+                                    onClick={() => setWasConvenient(true)}
+                                    className={`px-8 py-3 rounded-xl font-semibold transition flex items-center gap-2 ${
+                                        wasConvenient === true
+                                            ? "bg-green-800 text-white"
+                                            : "bg-green-700 text-white hover:bg-green-800"
+                                    }`}
+                                >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                     Yes, Perfect!
                                 </button>
-                                <button className="px-8 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition flex items-center gap-2">
+                                <button
+                                    onClick={() => setWasConvenient(false)}
+                                    className={`px-8 py-3 rounded-xl font-semibold transition flex items-center gap-2 ${
+                                        wasConvenient === false
+                                            ? "bg-gray-200 text-gray-800 border-2 border-gray-300"
+                                            : "bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50"
+                                    }`}
+                                >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                     </svg>
@@ -334,10 +374,14 @@ export default function NotificationsPage() {
                             {/* Submit Button */}
                             <button
                                 onClick={handleSubmitFeedback}
-                                className="w-full py-4 bg-indigo-600 rounded-xl text-white font-semibold hover:bg-indigo-700 transition"
+                                disabled={submitting}
+                                className="w-full py-4 bg-indigo-600 rounded-xl text-white font-semibold hover:bg-indigo-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
                             >
-                                Submit Feedback
+                                {submitting ? "Submitting..." : "Submit Feedback"}
                             </button>
+                            {submitMessage && (
+                                <p className="text-center text-sm text-gray-700 mt-3">{submitMessage}</p>
+                            )}
                         </div>
                     </div>
                 )}

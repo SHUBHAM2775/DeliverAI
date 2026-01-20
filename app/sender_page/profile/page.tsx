@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
     UserIcon,
@@ -10,10 +11,65 @@ import {
     CubeIcon,
     CheckCircleIcon,
     XCircleIcon,
+    ClockIcon,
+    MapPinIcon,
 } from "@heroicons/react/24/outline";
+
+interface ProfileData {
+    organizationName: string;
+    phone: string;
+    email: string;
+    startHour?: number;
+    endHour?: number;
+    defaultPickupAddress?: string;
+}
+
+interface OrderStats {
+    totalOrders: number;
+    delivered: number;
+    failed: number;
+}
 
 export default function ProfilePage() {
     const router = useRouter();
+    const [profileData, setProfileData] = useState<ProfileData | null>(null);
+    const [orderStats, setOrderStats] = useState<OrderStats>({
+        totalOrders: 0,
+        delivered: 0,
+        failed: 0,
+    });
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                setIsLoading(true);
+                const response = await fetch("/api/sender-profile");
+                if (response.ok) {
+                    const data = await response.json();
+                    setProfileData(data);
+                } else {
+                    console.error("Failed to fetch sender profile");
+                }
+            } catch (error) {
+                console.error("Error fetching profile:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProfile();
+    }, []);
+
+    const formatWorkingHours = (startHour?: number, endHour?: number) => {
+        if (startHour === undefined || endHour === undefined) return "Not set";
+        const formatHour = (hour: number) => {
+            const period = hour >= 12 ? "PM" : "AM";
+            const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+            return `${displayHour}:00 ${period}`;
+        };
+        return `${formatHour(startHour)} - ${formatHour(endHour)}`;
+    };
 
     const handleLogout = () => {
         alert("Logging out...");
@@ -24,18 +80,13 @@ export default function ProfilePage() {
         router.back();
     };
 
-    const profileData = {
-        shopName: "TechMart Electronics",
-        ownerName: "Rahul Sharma",
-        contact: "+91 98765 43210",
-        email: "rahul@techmart.com",
-    };
-
-    const orderStats = {
-        totalOrders: 156,
-        delivered: 142,
-        failed: 8,
-    };
+    if (isLoading) {
+        return (
+            <div className="flex-1 flex items-center justify-center">
+                <p className="text-gray-500">Loading profile...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="flex-1 flex relative">
@@ -78,7 +129,7 @@ export default function ProfilePage() {
                                 </svg>
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold text-gray-900">{profileData.shopName}</h2>
+                                <h2 className="text-xl font-bold text-gray-900">{profileData?.organizationName || "Loading..."}</h2>
                                 <p className="text-sm text-orange-500 font-medium">Registered Sender</p>
                             </div>
                         </div>
@@ -87,18 +138,10 @@ export default function ProfilePage() {
                     {/* Profile Details */}
                     <div className="px-6 space-y-3">
                         <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                            <UserIcon className="w-5 h-5 text-gray-400" />
-                            <div>
-                                <p className="text-xs text-gray-400">Owner Name</p>
-                                <p className="text-sm font-semibold text-gray-900">{profileData.ownerName}</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
                             <PhoneIcon className="w-5 h-5 text-gray-400" />
                             <div>
                                 <p className="text-xs text-gray-400">Contact</p>
-                                <p className="text-sm font-semibold text-gray-900">{profileData.contact}</p>
+                                <p className="text-sm font-semibold text-gray-900">{profileData?.phone || "N/A"}</p>
                             </div>
                         </div>
 
@@ -106,9 +149,29 @@ export default function ProfilePage() {
                             <EnvelopeIcon className="w-5 h-5 text-gray-400" />
                             <div>
                                 <p className="text-xs text-gray-400">Email</p>
-                                <p className="text-sm font-semibold text-gray-900">{profileData.email}</p>
+                                <p className="text-sm font-semibold text-gray-900">{profileData?.email || "N/A"}</p>
                             </div>
                         </div>
+
+                        <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                            <ClockIcon className="w-5 h-5 text-gray-400" />
+                            <div>
+                                <p className="text-xs text-gray-400">Shop Working Hours</p>
+                                <p className="text-sm font-semibold text-gray-900">
+                                    {formatWorkingHours(profileData?.startHour, profileData?.endHour)}
+                                </p>
+                            </div>
+                        </div>
+
+                        {profileData?.defaultPickupAddress && (
+                            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                                <MapPinIcon className="w-5 h-5 text-gray-400" />
+                                <div>
+                                    <p className="text-xs text-gray-400">Pickup Address</p>
+                                    <p className="text-sm font-semibold text-gray-900">{profileData.defaultPickupAddress}</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Order Summary */}
