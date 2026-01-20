@@ -140,13 +140,13 @@ export default function SlotIntelligencePage() {
         };
     }, []);
 
-    const toggleSlotActive = (id: number) => {
+    const toggleSlotActive = (id: string) => {
         setSlots(slots.map(slot =>
             slot.id === id ? { ...slot, active: !slot.active } : slot
         ));
     };
 
-    const toggleAiPreferred = (id: number) => {
+    const toggleAiPreferred = (id: string) => {
         setSlots(slots.map(slot =>
             slot.id === id ? { ...slot, aiPreferred: !slot.aiPreferred } : slot
         ));

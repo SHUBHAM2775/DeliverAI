@@ -6,6 +6,11 @@ import OrderModel from "@/models/Order";
 import UserModel from "@/models/User";
 import UniqueLinkModel from "@/models/UniqueLink";
 import { sendDeliveryConfirmationEmail } from "@/services/emailService";
+import { geocodeAddress } from "@/lib/geocodingService";
+import {
+  findTop5NearestDrivers,
+  logTop5DriversToConsole,
+} from "@/lib/driverOptimization";
 
 type DeliverySlotInput = {
   date?: string;
@@ -157,8 +162,8 @@ export async function POST(req: Request) {
       description,
       quantity,
       isFragile,
-      pickupLat,
-      pickupLng,
+      senderLat,
+      senderLng,
       imageBase64,
       deliverySlots = [],
     } = await req.json();
@@ -171,6 +176,60 @@ export async function POST(req: Request) {
     }
 
     await connectDB();
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // PART 1: ADDRESS GEOCODING
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    console.log("\n🌍 Starting address geocoding for order creation...");
+    console.log(`📍 Address to geocode: "${address}"`);
+
+    const geocodingResult = await geocodeAddress(address);
+
+    if (!geocodingResult.success) {
+      console.error("❌ Geocoding failed:", geocodingResult.error);
+      console.warn("⚠️  Order creation proceeding WITHOUT delivery location");
+      console.warn("⚠️  Driver optimization will NOT be triggered");
+    }
+
+    const deliveryLocation =
+      geocodingResult.success && geocodingResult.lat && geocodingResult.lng
+        ? {
+            lat: geocodingResult.lat,
+            lng: geocodingResult.lng,
+          }
+        : null;
+
+    console.log("🔍 Geocoding result:", {
+      success: geocodingResult.success,
+      lat: geocodingResult.lat,
+      lng: geocodingResult.lng,
+      error: geocodingResult.error,
+    });
+    console.log("📦 Calculated deliveryLocation:", deliveryLocation);
+    console.log("📍 Address used for geocoding:", address);
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // PART 2: PICKUP LOCATION (Sender's location)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    const pickupLocation =
+      senderLat && senderLng
+        ? {
+            lat: Number(senderLat),
+            lng: Number(senderLng),
+          }
+        : undefined;
+
+    if (!pickupLocation) {
+      console.warn("⚠️  No pickup location (sender location) provided");
+    } else {
+      console.log(`📍 Pickup location: (${pickupLocation.lat}, ${pickupLocation.lng})`);
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // PART 3: CREATE ORDER WITH RESOLVED COORDINATES
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     const [senderId, receiverId] = await Promise.all([
       resolveSenderId(),
@@ -195,7 +254,10 @@ export async function POST(req: Request) {
 
     const confirmationUuid = uuidv4();
 
-    const orderDoc = await OrderModel.create({
+    console.log("🔧 RIGHT BEFORE CREATE - deliveryLocation value:", deliveryLocation);
+    console.log("🔧 RIGHT BEFORE CREATE - typeof deliveryLocation:", typeof deliveryLocation);
+    
+    const orderPayload = {
       senderId,
       receiverId,
       commodityName: itemName,
@@ -209,20 +271,51 @@ export async function POST(req: Request) {
       pincode,
       workingStartTime,
       workingEndTime,
-      geoLocation:
-        pickupLat && pickupLng
-          ? {
-              latitude: Number(pickupLat),
-              longitude: Number(pickupLng),
-            }
-          : undefined,
+      pickupLocation: pickupLocation,
       deliveryDate: firstSlot?.date ? new Date(firstSlot.date) : undefined,
       orderStatus: "CREATED",
       deliveryAttemptCount: 0,
       firstAttemptSuccess: undefined,
       confirmationUuid,
       receiverPhone: phone,
+      deliveryLocation: deliveryLocation, // NEW: Customer address geocoded to lat/long
+    };
+    
+    console.log("🔧 FULL PAYLOAD deliveryLocation:", orderPayload.deliveryLocation);
+    console.log("🔧 FULL PAYLOAD pickupLocation:", orderPayload.pickupLocation);
+
+    const orderDoc = await OrderModel.create(orderPayload);
+
+    console.log("✅ Raw orderDoc from Mongoose:", JSON.stringify({
+      _id: orderDoc._id,
+      deliveryLocation: orderDoc.deliveryLocation,
+      pickupLocation: orderDoc.pickupLocation,
+      deliveryAddress: orderDoc.deliveryAddress,
+    }, null, 2));
+
+    console.log("✅ Order document saved with:", {
+      deliveryAddress: orderDoc.deliveryAddress,
+      deliveryLocation: orderDoc.deliveryLocation,
+      pickupLocation: orderDoc.pickupLocation,
     });
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // PART 4: DRIVER DISTANCE OPTIMIZATION
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    if (pickupLocation) {
+      console.log("\n🚚 Triggering driver distance optimization...");
+
+      const top5Drivers = await findTop5NearestDrivers(pickupLocation);
+
+      logTop5DriversToConsole(top5Drivers, pickupLocation);
+    } else {
+      console.warn("\n⚠️  Driver optimization SKIPPED (no pickup location available)");
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // CREATE UNIQUE LINK & SEND EMAIL
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     // Create unique link entry immediately after order creation
     try {
