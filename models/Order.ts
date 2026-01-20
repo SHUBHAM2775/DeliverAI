@@ -26,6 +26,8 @@ export interface Order extends Document {
   finalSlotId?: Types.ObjectId;
   deliveryAttemptCount: number;
   firstAttemptSuccess?: boolean;
+  confirmationUuid?: string;
+  receiverPhone?: string;
   createdAt?: Date;
 }
 
@@ -63,6 +65,8 @@ const orderSchema = new Schema<Order>(
     finalSlotId: { type: Schema.Types.ObjectId, ref: "DeliverySlot" },
     deliveryAttemptCount: { type: Number, default: 0 },
     firstAttemptSuccess: { type: Boolean },
+    confirmationUuid: { type: String },
+    receiverPhone: { type: String },
     createdAt: { type: Date },
   },
   { timestamps: true, collection: "orders" },

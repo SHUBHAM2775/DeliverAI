@@ -1,8 +1,10 @@
 
 import { NextResponse } from "next/server";
+import { v4 as uuidv4 } from "uuid";
 import connectDB from "@/lib/db";
 import OrderModel from "@/models/Order";
 import UserModel from "@/models/User";
+import { sendDeliveryConfirmationEmail } from "@/services/emailService";
 
 type DeliverySlotInput = {
   date?: string;
@@ -129,6 +131,8 @@ export async function POST(req: Request) {
     const workingStartTime = firstSlot?.startTime;
     const workingEndTime = firstSlot?.endTime;
 
+    const confirmationUuid = uuidv4();
+
     const orderDoc = await OrderModel.create({
       senderId,
       receiverId,
@@ -154,10 +158,38 @@ export async function POST(req: Request) {
       orderStatus: "CREATED",
       deliveryAttemptCount: 0,
       firstAttemptSuccess: undefined,
+      confirmationUuid,
+      receiverPhone: phone,
     });
 
+    let emailStatus: { sent: boolean; error?: string } = { sent: false };
+
+    // Email sending; the order is created even if email fails.
+    if (email) {
+      const emailResult = await sendDeliveryConfirmationEmail(
+        email,
+        confirmationUuid,
+      );
+      emailStatus = {
+        sent: emailResult.success,
+        error: emailResult.error,
+      };
+
+      if (!emailResult.success) {
+        console.error("Failed to send delivery confirmation email", {
+          orderId: orderDoc._id,
+          error: emailResult.error,
+        });
+      }
+    } else {
+      emailStatus = { sent: false, error: "No email address provided" };
+      console.warn("No email provided; delivery confirmation email not sent", {
+        orderId: orderDoc._id,
+      });
+    }
+
     return NextResponse.json(
-      { orderId: orderDoc._id },
+      { orderId: orderDoc._id, confirmationUuid, email: emailStatus },
       { status: 201 },
     );
   } catch (error) {
