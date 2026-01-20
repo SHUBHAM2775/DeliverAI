@@ -251,6 +251,7 @@ async function seed() {
       seller_allowed_time_range: "09:00-19:00",
       parcel_category: "Electronics",
       delivery_location: { latitude: 37.7801, longitude: -122.4101 },
+      store_location: { latitude: 37.785, longitude: -122.405 },
     },
     {
       area: "Downtown",
