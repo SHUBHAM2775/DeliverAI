@@ -2,11 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-    BellIcon,
-    ChevronDownIcon,
-    ArrowRightOnRectangleIcon,
-} from "@heroicons/react/24/outline";
+import { BellIcon, ChevronDownIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
+import axios from "axios";
 
 interface HeaderProps {
     title?: string;
@@ -17,6 +14,16 @@ export default function Header({ title = "Overview", role = "Admin" }: HeaderPro
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement | null>(null);
+    const [displayName, setDisplayName] = useState<string>(role);
+    const [avatarUrl, setAvatarUrl] = useState<string>("https://i.pravatar.cc/40?img=3");
+
+    const safeParseSession = (raw: string) => {
+        try {
+            return JSON.parse(raw) as { phone?: string; role?: string; name?: string; avatarSeed?: number };
+        } catch (e) {
+            return null;
+        }
+    };
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -28,8 +35,35 @@ export default function Header({ title = "Overview", role = "Admin" }: HeaderPro
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    useEffect(() => {
+        const sessionRaw = typeof window !== "undefined" ? localStorage.getItem("rubixSession") : null;
+        if (!sessionRaw) return;
+
+        const session = safeParseSession(sessionRaw);
+        if (!session?.phone) return;
+
+        const seed = session.avatarSeed ?? Math.floor(Math.random() * 70) + 1;
+        setAvatarUrl(`https://i.pravatar.cc/80?img=${seed}`);
+        if (session.name) setDisplayName(session.name);
+
+        axios
+            .get(`/api/users/by-phone?phone=${encodeURIComponent(session.phone)}`)
+            .then((res) => {
+                const data = res.data;
+                if (data?.name) setDisplayName(data.name);
+            })
+            .catch((err) => {
+                console.warn("Could not fetch user name", err);
+            });
+    }, []);
+
     const handleLogout = () => {
         setOpen(false);
+        try {
+            localStorage.removeItem("rubixSession");
+        } catch (e) {
+            // ignore
+        }
         router.push("/");
     };
 
@@ -47,11 +81,11 @@ export default function Header({ title = "Overview", role = "Admin" }: HeaderPro
                         onClick={() => setOpen((prev) => !prev)}
                     >
                         <div className="text-right">
-                            <p className="text-sm font-semibold text-gray-900">{role}</p>
+                            <p className="text-sm font-semibold text-gray-900">{displayName || role}</p>
                             <p className="text-xs text-gray-500">Logged in</p>
                         </div>
                         <img
-                            src="https://i.pravatar.cc/40?img=3"
+                            src={avatarUrl}
                             className="h-9 w-9 rounded-full object-cover"
                             alt="avatar"
                         />

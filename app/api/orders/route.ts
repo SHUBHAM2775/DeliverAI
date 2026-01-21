@@ -1,6 +1,7 @@
 
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
+import bcrypt from "bcryptjs";
 import connectDB from "@/lib/db";
 import OrderModel from "@/models/Order";
 import UserModel from "@/models/User";
@@ -19,6 +20,10 @@ type DeliverySlotInput = {
   endTime?: string;
 };
 
+async function passwordHashFrom(seed: string) {
+  return bcrypt.hash(seed || "rubix-temp-password", 10);
+}
+
 async function resolveSenderId() {
   // Prefer explicit sender id/email; fall back to first SENDER or create one.
   const defaultSenderId = process.env.DEFAULT_SENDER_ID;
@@ -35,9 +40,13 @@ async function resolveSenderId() {
   if (!sender) {
     sender = await UserModel.create({
       role: "SENDER",
+      roles: ["SENDER"],
       name: "Default Sender",
       email: defaultSenderEmail,
       phone: "N/A",
+      password: await passwordHashFrom(defaultSenderEmail),
+      isFirstTime: false,
+      status: "ACTIVE",
     });
   }
 
@@ -58,8 +67,13 @@ async function upsertReceiver({
     return (
       await UserModel.create({
         role: "RECEIVER",
+        roles: ["RECEIVER"],
         name,
         email: `receiver+${Date.now()}@example.com`,
+        phone: "N/A",
+        password: await passwordHashFrom(name),
+        isFirstTime: false,
+        status: "ACTIVE",
       })
     )._id;
   }
@@ -75,10 +89,13 @@ async function upsertReceiver({
   try {
     const receiver = await UserModel.create({
       role: "RECEIVER",
+      roles: ["RECEIVER"],
       status: "ACTIVE",
       name,
       email,
       phone,
+      password: await passwordHashFrom(phone || email || name),
+      isFirstTime: false,
     });
     return receiver._id;
   } catch (err) {
