@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import {
     CalendarIcon,
     MapPinIcon,
@@ -18,7 +18,7 @@ interface OrderDetails {
     deliveryAddress: string;
 }
 
-export default function ConfirmationPage() {
+function ConfirmationPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
@@ -222,5 +222,13 @@ export default function ConfirmationPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function ConfirmationPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+            <ConfirmationPageContent />
+        </Suspense>
     );
 }

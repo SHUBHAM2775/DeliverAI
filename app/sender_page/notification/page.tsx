@@ -9,6 +9,7 @@ import {
     TruckIcon,
     XCircleIcon,
     ArrowPathIcon,
+    BellIcon,
 } from "@heroicons/react/24/outline";
 
 interface NotificationItem {
