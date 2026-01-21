@@ -305,8 +305,8 @@ export default function SlotSelectionClient({ orderData, uuid }: SlotSelectionCl
                                             key={idx}
                                             onClick={() => setSelectedDate(day.fullDate)}
                                             className={`p-2 rounded-lg text-center transition ${selectedDate === day.fullDate
-                                                    ? 'bg-indigo-500 text-white'
-                                                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                                                ? 'bg-indigo-500 text-white'
+                                                : 'bg-white text-gray-700 hover:bg-gray-100'
                                                 }`}
                                         >
                                             <div className="text-[10px] font-medium">{day.dayName}</div>
@@ -319,7 +319,7 @@ export default function SlotSelectionClient({ orderData, uuid }: SlotSelectionCl
                             {/* Time Slider */}
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3">
-                                    Your Available Time: <span className="text-indigo-600">{preferredTime}:00</span>
+                                    Your Available Time: <span className="text-indigo-600">{preferredTime}:00 - {preferredTime + 1}:00</span>
                                 </label>
                                 <p className="text-xs text-gray-500 mb-2">Set your preferred time when you're available for delivery</p>
                                 <div className="relative">
