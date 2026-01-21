@@ -33,10 +33,18 @@ export async function POST(req: Request) {
     const receiverEmail = (order.receiverId as any)?.email;
     const receiverName = (order.receiverId as any)?.name;
 
+    // If no valid receiver email, silently skip but return success
     if (!receiverEmail) {
+      console.warn("Skipping order without receiver email:", { orderId });
       return NextResponse.json(
-        { error: "Receiver email not found for this order" },
-        { status: 400 }
+        {
+          success: true,
+          message: "Alert processed",
+          orderId,
+          mailSent: false,
+          reason: "no_valid_email",
+        },
+        { status: 200 }
       );
     }
 
@@ -62,7 +70,7 @@ export async function POST(req: Request) {
           error: linkError,
         });
         return NextResponse.json(
-          { error: "Failed to create delivery link for this order" },
+          { error: "Failed to process this order" },
           { status: 500 }
         );
       }
@@ -84,8 +92,14 @@ export async function POST(req: Request) {
       });
 
       return NextResponse.json(
-        { error: emailResult.error || "Failed to send emergency alert email" },
-        { status: 500 }
+        { 
+          success: true,
+          message: "Alert processed",
+          orderId,
+          mailSent: false,
+          reason: "email_service_error",
+        },
+        { status: 200 }
       );
     }
 
@@ -94,17 +108,20 @@ export async function POST(req: Request) {
         success: true,
         message: "Emergency alert sent to customer",
         orderId,
-        receiverEmail,
+        mailSent: true,
       },
       { status: 200 }
     );
   } catch (error) {
     console.error("Emergency alert API error", error);
-    const message =
-      error instanceof Error ? error.message : "Unknown error while sending emergency alert";
+    // Return generic success to hide internal errors
     return NextResponse.json(
-      { error: message },
-      { status: 500 }
+      {
+        success: true,
+        message: "Alert processed",
+        mailSent: false,
+      },
+      { status: 200 }
     );
   }
 }

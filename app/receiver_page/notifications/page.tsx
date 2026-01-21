@@ -26,6 +26,7 @@ interface OrderData {
     deliveryDate?: string;
     agentName?: string;
     orderStatus: string;
+    receiverName?: string;
     receiverEmail?: string;
 }
 
@@ -60,6 +61,68 @@ const generateDaysWindow = () => {
         });
     }
     return days;
+};
+
+// Derive messaging based on delivery date (today/tomorrow/in N days)
+const buildDeliveryMessaging = (orderData?: OrderData, slotConfirmation?: SlotConfirmationData) => {
+    const isoFromConfirmation = slotConfirmation?.selectedDate;
+    const isoFromOrder = orderData?.deliveryDate;
+
+    // Extract date from custom slot format: custom-YYYY-MM-DD-HH:MM
+    let isoFromCustom: string | undefined;
+    if (orderData?.customSlotTime?.startsWith("custom-")) {
+        const parts = orderData.customSlotTime.split("-");
+        if (parts.length >= 4) {
+            isoFromCustom = `${parts[1]}-${parts[2]}-${parts[3]}`;
+        }
+    }
+
+    const iso = isoFromConfirmation || isoFromOrder || isoFromCustom;
+
+    if (!iso) {
+        return {
+            title: "Your Delivery is Scheduled",
+            subtitle: "Get ready to receive your package",
+        };
+    }
+
+    const toMidnight = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const today = new Date();
+    const target = new Date(iso);
+    const diffDays = Math.round((toMidnight(target) - toMidnight(today)) / 86_400_000); // ms per day
+
+    const formattedDate = target.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+    });
+
+    if (diffDays === 0) {
+        return {
+            title: "Your Delivery is Scheduled Today!",
+            subtitle: "Get ready to receive your package",
+        };
+    }
+
+    if (diffDays === 1) {
+        return {
+            title: "Your Delivery is Tomorrow!",
+            subtitle: `Arriving on ${formattedDate}`,
+        };
+    }
+
+    if (diffDays > 1) {
+        return {
+            title: `Your Delivery is in ${diffDays} days!`,
+            subtitle: `Arriving on ${formattedDate}`,
+        };
+    }
+
+    // Past date fallback
+    return {
+        title: "Your Delivery was Scheduled",
+        subtitle: `Originally set for ${formattedDate}`,
+    };
 };
 
 function NotificationsPageContent() {
@@ -106,7 +169,8 @@ function NotificationsPageContent() {
                     console.log('Custom slot time:', order.customSlotTime);
 
                     // Fetch agent details if agentId exists
-                    let agentName = 'Rajesh Kumar';
+                    const fallbackAgents = ['Rajesh Kumar', 'Amit Sharma', 'Priya Singh'];
+                    let agentName = fallbackAgents[Math.floor(Math.random() * fallbackAgents.length)];
                     if (order.agentId) {
                         try {
                             const agentResponse = await fetch(`/api/users?id=${order.agentId}`);
@@ -121,7 +185,8 @@ function NotificationsPageContent() {
 
                     setOrderData({
                         ...order,
-                        agentName
+                        agentName,
+                        receiverName: order.receiverName || order?.receiverId?.name || order?.receiverDetails?.name
                     });
 
                     // Fetch slot confirmation for this order only if _id exists
@@ -150,29 +215,40 @@ function NotificationsPageContent() {
         fetchData();
     }, []);
 
-    const formatSlotTime = (slotTime?: string) => {
-        console.log('Formatting slot time:', slotTime);
+    const formatHour12 = (h: number) => {
+        const hour = ((h % 12) + 12) % 12;
+        const display = hour === 0 ? 12 : hour;
+        const suffix = h >= 12 ? "PM" : "AM";
+        return `${display} ${suffix}`;
+    };
 
+    const formatSlotTime = (slotTime?: string) => {
         if (!slotTime) return '8:00 AM - 10:00 AM';
 
-        // Check if it's a custom slot format (custom-YYYY-MM-DD-HH:MM)
+        // If already includes AM/PM, trust it
+        if (/am|pm/i.test(slotTime)) return slotTime;
+
+        // Custom slot format: custom-YYYY-MM-DD-HH:MM
         if (slotTime.startsWith('custom-')) {
             const parts = slotTime.split('-');
-            console.log('Custom slot parts:', parts);
             if (parts.length >= 5) {
                 const hour = parseInt(parts[4].split(':')[0]);
                 const endHour = hour + 1;
-                const formatHour = (h: number) => {
-                    if (h === 0) return '12 AM';
-                    if (h < 12) return `${h} AM`;
-                    if (h === 12) return '12 PM';
-                    return `${h - 12} PM`;
-                };
-                return `${formatHour(hour)} - ${formatHour(endHour)}`;
+                return `${formatHour12(hour)} - ${formatHour12(endHour)}`;
             }
         }
 
-        // If it's already in readable format, return as is
+        // Generic numeric range, e.g., "13-14" or "9-11"
+        const parts = slotTime.split('-').map((p) => p.trim());
+        if (parts.length === 2) {
+            const startHour = parseInt(parts[0].split(':')[0], 10);
+            const endHour = parseInt(parts[1].split(':')[0], 10);
+            if (!Number.isNaN(startHour) && !Number.isNaN(endHour)) {
+                return `${formatHour12(startHour)} - ${formatHour12(endHour)}`;
+            }
+        }
+
+        // Fallback to original string
         return slotTime;
     };
 
@@ -218,36 +294,42 @@ function NotificationsPageContent() {
     return (
         <div className="flex-1 overflow-y-auto bg-gray-50">
             <div className="p-8 min-h-full">
-                <ReceiverHeader title="Notifications" subtitle="Stay in sync with deliveries" />
+                <ReceiverHeader
+                    title={`Hi, ${orderData?.receiverName || 'there'}`}
+                    subtitle="Stay in sync with deliveries"
+                />
 
                 {/* Tabs */}
                 <div className="flex gap-3 mb-8">
                     <button
                         onClick={() => setActiveTab("reminder")}
-                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${activeTab === "reminder"
-                            ? "bg-indigo-600 text-white"
-                            : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                            }`}
+                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${
+                            activeTab === "reminder"
+                                ? "bg-indigo-600 text-white"
+                                : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                        }`}
                     >
                         <BellIcon className="w-4 h-4" />
                         Reminder
                     </button>
                     <button
                         onClick={() => setActiveTab("reschedule")}
-                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${activeTab === "reschedule"
-                            ? "bg-indigo-600 text-white"
-                            : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                            }`}
+                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${
+                            activeTab === "reschedule"
+                                ? "bg-indigo-600 text-white"
+                                : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                        }`}
                     >
                         <CalendarIcon className="w-4 h-4" />
                         Reschedule
                     </button>
                     <button
                         onClick={() => setActiveTab("feedback")}
-                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${activeTab === "feedback"
-                            ? "bg-indigo-600 text-white"
-                            : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                            }`}
+                        className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${
+                            activeTab === "feedback"
+                                ? "bg-indigo-600 text-white"
+                                : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                        }`}
                     >
                         <ChatBubbleBottomCenterTextIcon className="w-4 h-4" />
                         Feedback
@@ -266,7 +348,10 @@ function NotificationsPageContent() {
                                 <p className="text-red-600">{error}</p>
                             </div>
                         ) : (
-                            <div className="bg-gradient-to-br from-purple-100 to-indigo-100 rounded-3xl p-10">
+                            (() => {
+                                const messaging = buildDeliveryMessaging(orderData || undefined, slotConfirmation || undefined);
+                                return (
+                            <div className="bg-linear-to-br from-purple-100 to-indigo-100 rounded-3xl p-10">
                                 {/* Bell Icon */}
                                 <div className="flex justify-center mb-6">
                                     <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center">
@@ -276,10 +361,10 @@ function NotificationsPageContent() {
 
                                 {/* Title */}
                                 <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">
-                                    Your Delivery is Scheduled Today!
+                                    {messaging.title}
                                 </h2>
                                 <p className="text-gray-600 text-center mb-8">
-                                    Get ready to receive your package
+                                    {messaging.subtitle}
                                 </p>
 
                                 {/* Confirmed Slot */}
@@ -324,6 +409,8 @@ function NotificationsPageContent() {
                                     </button>
                                 </div>
                             </div>
+                                );
+                            })()
                         )}
                     </div>
                 )}
@@ -331,9 +418,9 @@ function NotificationsPageContent() {
                 {activeTab === "reschedule" && (
                     <div className="max-w-2xl mx-auto">
                         {/* Warning Banner */}
-                        <div className="bg-gradient-to-r from-purple-200 to-violet-200 rounded-xl p-4 mb-6 border border-purple-300">
+                        <div className="bg-linear-to-r from-purple-200 to-violet-200 rounded-xl p-4 mb-6 border border-purple-300">
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center flex-shrink-0">
+                                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0">
                                     <svg className="w-5 h-5 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
@@ -449,7 +536,7 @@ function NotificationsPageContent() {
 
                 {activeTab === "feedback" && (
                     <div className="max-w-2xl mx-auto">
-                        <div className="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl p-10">
+                        <div className="bg-linear-to-br from-blue-100 to-indigo-100 rounded-3xl p-10">
                             {/* Feedback Icon */}
                             <div className="flex justify-center mb-6">
                                 <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center">

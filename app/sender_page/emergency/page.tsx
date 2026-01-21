@@ -17,12 +17,21 @@ interface Order {
 export default function EmergencyPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [selectedOrderId, setSelectedOrderId] = useState('');
+  const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const isReadyToSend = selectedOrderIds.length > 0 && description.trim().length > 0;
+
+  // Auto-clear error when form is ready
+  useEffect(() => {
+    if (isReadyToSend && errorMessage) {
+      setErrorMessage('');
+    }
+  }, [isReadyToSend, errorMessage]);
 
   // Fetch active orders on mount
   useEffect(() => {
@@ -42,8 +51,9 @@ export default function EmergencyPage() {
   }, []);
 
   const handleSendEmergencyAlert = async () => {
-    if (!selectedOrderId) {
-      setErrorMessage('Please select an order');
+    // Final validation before send
+    if (selectedOrderIds.length === 0) {
+      setErrorMessage('Please select at least one order');
       return;
     }
 
@@ -52,39 +62,52 @@ export default function EmergencyPage() {
       return;
     }
 
-    setErrorMessage('');
     setIsSubmitting(true);
+    setErrorMessage('');
 
     try {
-      const response = await fetch('/api/emergency-alert', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId: selectedOrderId,
-          disruption: description,
-        }),
-      });
+      // Send alert for each selected order
+      const responses = await Promise.all(
+        selectedOrderIds.map((orderId) =>
+          fetch('/api/emergency-alert', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              orderId: orderId,
+              disruption: description,
+            }),
+          }).then((r) => r.json().then((data) => ({ ...data, status: r.status })))
+        )
+      );
 
-      const data = await response.json();
+      // Count successful emails
+      const mailsSent = responses.filter((r) => r.mailSent).length;
+      const totalOrders = selectedOrderIds.length;
+      const skipped = totalOrders - mailsSent;
 
-      if (!response.ok) {
-        throw new Error(data?.error || 'Failed to send emergency alert');
+      // Show success message
+      let message = `✓ Emergency alert processed!\n📧 `;
+      if (mailsSent > 0) {
+        message += `${mailsSent} order${mailsSent !== 1 ? 's' : ''} notified`;
+        if (skipped > 0) {
+          message += ` (${skipped} order${skipped !== 1 ? 's' : ''} skipped)`;
+        }
+      } else {
+        message += `All orders processed`;
       }
 
-      setSuccessMessage(
-        `✓ Emergency alert sent!\n📧 Customer notified to reschedule delivery`
-      );
+      setSuccessMessage(message);
       setShowSuccess(true);
       setDescription('');
-      setSelectedOrderId('');
+      setSelectedOrderIds([]);
 
       setTimeout(() => {
         setShowSuccess(false);
         router.push('/sender_page/dashboard');
       }, 3000);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to send alert';
-      setErrorMessage(message);
+      setErrorMessage('Something went wrong while processing your request. Please try again.');
+      console.error('Emergency alert error:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -120,7 +143,7 @@ export default function EmergencyPage() {
           {/* Left Column - Alert Section */}
           <div className="col-span-2 space-y-6">
             {/* Emergency Alert Box */}
-            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl border-2 border-red-300 p-8">
+            <div className="bg-linear-to-br from-red-50 to-red-100 rounded-xl border-2 border-red-300 p-8">
               <div className="flex items-start gap-4">
                 <div className="relative">
                   <div className="siren-glow w-20 h-20 bg-red-500 rounded-full absolute inset-0 opacity-30"></div>
@@ -139,37 +162,78 @@ export default function EmergencyPage() {
 
             {/* Order Selection */}
             <div className="bg-white rounded-xl border border-gray-100 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Select Order</h3>
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-lg font-bold text-gray-900">Select Order</h3>
+                <span className="text-xs text-gray-500">Order ID and disruption description are required</span>
+              </div>
               {orders.length === 0 ? (
                 <p className="text-gray-500">No active orders found</p>
               ) : (
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {orders.map((order) => (
-                    <button
-                      key={order.id}
-                      onClick={() => setSelectedOrderId(order.id)}
-                      className={`w-full text-left p-4 rounded-lg border-2 transition ${
-                        selectedOrderId === order.id
-                          ? 'border-red-500 bg-red-50'
-                          : 'border-gray-200 bg-white hover:border-red-300'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-semibold text-gray-900">{order.commodity}</p>
-                          <p className="text-sm text-gray-600">📦 {order.customer}</p>
-                          <p className="text-xs text-gray-500 mt-1">{order.area} • {order.pincode}</p>
-                        </div>
-                        <span className={`text-xs font-semibold px-2 py-1 rounded ${
-                          order.status === 'CREATED' ? 'bg-blue-100 text-blue-800' :
-                          order.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {order.status}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-sm text-gray-700">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 text-red-600 border-gray-300 rounded"
+                        checked={orders.length > 0 && selectedOrderIds.length === orders.length}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedOrderIds(orders.map((o) => o.id));
+                          } else {
+                            setSelectedOrderIds([]);
+                          }
+                        }}
+                      />
+                      <span className="font-medium">Select all</span>
+                    </label>
+                    <span className="text-xs text-gray-500">{selectedOrderIds.length} selected</span>
+                  </div>
+
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {orders.map((order) => {
+                      const checked = selectedOrderIds.includes(order.id);
+                      return (
+                        <label
+                          key={order.id}
+                          className={`w-full p-4 rounded-lg border-2 transition block cursor-pointer ${
+                            checked
+                              ? 'border-red-500 bg-red-50'
+                              : 'border-gray-200 bg-white hover:border-red-300'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-3">
+                              <input
+                                type="checkbox"
+                                className="mt-1 h-4 w-4 text-red-600 border-gray-300 rounded"
+                                checked={checked}
+                                onChange={(e) => {
+                                  setErrorMessage('');
+                                  if (e.target.checked) {
+                                    setSelectedOrderIds((prev) => [...new Set([...prev, order.id])]);
+                                  } else {
+                                    setSelectedOrderIds((prev) => prev.filter((id) => id !== order.id));
+                                  }
+                                }}
+                              />
+                              <div>
+                                <p className="font-semibold text-gray-900">{order.commodity}</p>
+                                <p className="text-sm text-gray-600">📦 {order.customer}</p>
+                                <p className="text-xs text-gray-500 mt-1">{order.area} • {order.pincode}</p>
+                              </div>
+                            </div>
+                            <span className={`text-xs font-semibold px-2 py-1 rounded ${
+                              order.status === 'CREATED' ? 'bg-blue-100 text-blue-800' :
+                              order.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {order.status}
+                            </span>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
@@ -179,7 +243,10 @@ export default function EmergencyPage() {
               <h3 className="text-lg font-bold text-gray-900 mb-4">Describe the Disruption</h3>
               <textarea
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => {
+                  setErrorMessage('');
+                  setDescription(e.target.value);
+                }}
                 placeholder="e.g., Warehouse fire, Vehicle accident, Weather emergency, Stock shortage, etc."
                 rows={6}
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
@@ -214,8 +281,13 @@ export default function EmergencyPage() {
               </button>
               <button
                 onClick={handleSendEmergencyAlert}
-                disabled={isSubmitting}
-                className="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                disabled={isSubmitting || !isReadyToSend}
+                title={!isReadyToSend ? 'Please select an order and describe the disruption' : ''}
+                className={`px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition ${
+                  isReadyToSend
+                    ? 'bg-red-600 text-white hover:bg-red-700 cursor-pointer'
+                    : 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-70'
+                }`}
               >
                 <ExclamationTriangleIcon className="w-5 h-5" />
                 {isSubmitting ? 'Sending Alert...' : 'Send Emergency Alert'}
@@ -233,19 +305,19 @@ export default function EmergencyPage() {
               </h3>
               <ul className="space-y-3 text-sm text-gray-700">
                 <li className="flex gap-2">
-                  <span className="text-amber-600 font-bold flex-shrink-0">1</span>
+                  <span className="text-amber-600 font-bold shrink-0">1</span>
                   <span>Customer receives emergency notification email</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-amber-600 font-bold flex-shrink-0">2</span>
+                  <span className="text-amber-600 font-bold shrink-0">2</span>
                   <span>Email includes your disruption description</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-amber-600 font-bold flex-shrink-0">3</span>
+                  <span className="text-amber-600 font-bold shrink-0">3</span>
                   <span>Customer can click link to reschedule delivery slots</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-amber-600 font-bold flex-shrink-0">4</span>
+                  <span className="text-amber-600 font-bold shrink-0">4</span>
                   <span>You can monitor updates in the dashboard</span>
                 </li>
               </ul>
