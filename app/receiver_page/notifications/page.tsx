@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
     BellIcon,
@@ -15,6 +15,24 @@ import {
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 import { StarIcon as StarIconOutline } from "@heroicons/react/24/outline";
 import ReceiverHeader from "@/components/ReceiverHeader";
+
+interface OrderData {
+    _id: string;
+    commodityName: string;
+    deliveryAddress: string;
+    area: string;
+    pincode: string;
+    customSlotTime?: string;
+    deliveryDate?: string;
+    agentName?: string;
+    orderStatus: string;
+}
+
+interface SlotConfirmationData {
+    customSlot?: string;
+    selectedDate?: string;
+    confirmedAt?: string;
+}
 
 const availableSlots = [
     { time: "8:00 - 11:00 AM", rate: 88, badge: "AI Pick" },
@@ -55,6 +73,98 @@ export default function NotificationsPage() {
     const [wasConvenient, setWasConvenient] = useState<boolean | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+    const [orderData, setOrderData] = useState<OrderData | null>(null);
+    const [slotConfirmation, setSlotConfirmation] = useState<SlotConfirmationData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                
+                // Fetch the most recent confirmed order
+                const ordersResponse = await fetch('/api/orders?status=CONFIRMED');
+                if (!ordersResponse.ok) throw new Error('Failed to fetch orders');
+                
+                const ordersData = await ordersResponse.json();
+                console.log('Orders data:', ordersData);
+                if (ordersData.orders && ordersData.orders.length > 0) {
+                    const order = ordersData.orders[0];
+                                        console.log('Order details:', order);
+                                        console.log('Custom slot time:', order.customSlotTime);
+                    
+                    // Fetch agent details if agentId exists
+                    let agentName = 'Rajesh Kumar';
+                    if (order.agentId) {
+                        try {
+                            const agentResponse = await fetch(`/api/users?id=${order.agentId}`);
+                            if (agentResponse.ok) {
+                                const agentData = await agentResponse.json();
+                                agentName = agentData.name || 'Unknown Agent';
+                            }
+                        } catch (err) {
+                            console.error('Error fetching agent:', err);
+                        }
+                    }
+                    
+                    setOrderData({
+                        ...order,
+                        agentName
+                    });
+                    
+                    // Fetch slot confirmation for this order only if _id exists
+                    if (order._id) {
+                        try {
+                            const confirmationResponse = await fetch(`/api/slot-confirmation?orderId=${order._id}`);
+                            if (confirmationResponse.ok) {
+                                const confirmationData = await confirmationResponse.json();
+                                setSlotConfirmation(confirmationData);
+                            }
+                        } catch (err) {
+                            console.error('Error fetching slot confirmation:', err);
+                        }
+                    }
+                } else {
+                    setError('No confirmed orders found');
+                }
+            } catch (err) {
+                console.error('Error fetching data:', err);
+                setError('Failed to load notification data');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const formatSlotTime = (slotTime?: string) => {
+        console.log('Formatting slot time:', slotTime);
+        
+        if (!slotTime) return '8:00 AM - 10:00 AM';
+        
+        // Check if it's a custom slot format (custom-YYYY-MM-DD-HH:MM)
+        if (slotTime.startsWith('custom-')) {
+            const parts = slotTime.split('-');
+                        console.log('Custom slot parts:', parts);
+            if (parts.length >= 5) {
+                const hour = parseInt(parts[4].split(':')[0]);
+                const endHour = hour + 1;
+                const formatHour = (h: number) => {
+                    if (h === 0) return '12 AM';
+                    if (h < 12) return `${h} AM`;
+                    if (h === 12) return '12 PM';
+                    return `${h - 12} PM`;
+                };
+                return `${formatHour(hour)} - ${formatHour(endHour)}`;
+            }
+        }
+        
+        // If it's already in readable format, return as is
+        return slotTime;
+    };
 
     const handleReschedule = () => {
         setActiveTab("reschedule");
@@ -137,60 +247,74 @@ export default function NotificationsPage() {
                 {/* Content */}
                 {activeTab === "reminder" && (
                     <div className="max-w-3xl mx-auto">
-                        <div className="bg-gradient-to-br from-purple-100 to-indigo-100 rounded-3xl p-10">
-                            {/* Bell Icon */}
-                            <div className="flex justify-center mb-6">
-                                <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center">
-                                    <BellIcon className="w-8 h-8 text-white" />
+                        {loading ? (
+                            <div className="bg-white rounded-3xl p-10 text-center">
+                                <p className="text-gray-600">Loading notification data...</p>
+                            </div>
+                        ) : error ? (
+                            <div className="bg-white rounded-3xl p-10 text-center">
+                                <p className="text-red-600">{error}</p>
+                            </div>
+                        ) : (
+                            <div className="bg-gradient-to-br from-purple-100 to-indigo-100 rounded-3xl p-10">
+                                {/* Bell Icon */}
+                                <div className="flex justify-center mb-6">
+                                    <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center">
+                                        <BellIcon className="w-8 h-8 text-white" />
+                                    </div>
+                                </div>
+
+                                {/* Title */}
+                                <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">
+                                    Your Delivery is Scheduled Today!
+                                </h2>
+                                <p className="text-gray-600 text-center mb-8">
+                                    Get ready to receive your package
+                                </p>
+
+                                {/* Confirmed Slot */}
+                                <div className="bg-white rounded-2xl p-6 mb-6">
+                                    <p className="text-sm text-gray-500 text-center mb-2">Confirmed Delivery Slot</p>
+                                    <div className="flex items-center justify-center gap-3 mb-4">
+                                        <ClockIcon className="w-6 h-6 text-indigo-600" />
+                                        <h3 className="text-2xl font-bold text-gray-900">
+                                            {formatSlotTime(orderData?.customSlotTime)}
+                                        </h3>
+                                    </div>
+                                    <div className="flex items-center justify-center gap-2 text-gray-700 mb-1">
+                                        <UserIcon className="w-5 h-5 text-indigo-600" />
+                                        <p className="font-medium">Delivery Partner: <span className="text-indigo-600">{orderData?.agentName || 'Rajesh Kumar'}</span></p>
+                                    </div>
+                                </div>
+
+                                {/* Address */}
+                                <div className="flex items-start justify-center gap-3 text-gray-700 mb-8">
+                                    <MapPinIcon className="w-5 h-5 text-indigo-600 mt-0.5" />
+                                    <p className="text-sm">
+                                        {orderData?.deliveryAddress}, {orderData?.area}, {orderData?.pincode}
+                                    </p>
+                                </div>
+
+                                {/* Buttons */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <button
+                                        onClick={handleReschedule}
+                                        className="py-4 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                        I Won't Be Available
+                                    </button>
+                                    <button className="py-4 bg-green-700 rounded-xl text-white font-semibold hover:bg-green-800 transition flex items-center justify-center gap-2">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        I Will Be Available
+                                    </button>
                                 </div>
                             </div>
-
-                            {/* Title */}
-                            <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">
-                                Your Delivery is Scheduled Today!
-                            </h2>
-                            <p className="text-gray-600 text-center mb-8">
-                                Get ready to receive your package
-                            </p>
-
-                            {/* Confirmed Slot */}
-                            <div className="bg-white rounded-2xl p-6 mb-6">
-                                <p className="text-sm text-gray-500 text-center mb-2">Confirmed Delivery Slot</p>
-                                <div className="flex items-center justify-center gap-3 mb-4">
-                                    <ClockIcon className="w-6 h-6 text-indigo-600" />
-                                    <h3 className="text-2xl font-bold text-gray-900">8:00 - 10:00 AM</h3>
-                                </div>
-                                <div className="flex items-center justify-center gap-2 text-gray-700 mb-1">
-                                    <UserIcon className="w-5 h-5 text-indigo-600" />
-                                    <p className="font-medium">Delivery Partner: <span className="text-indigo-600">Michael Rodriguez</span></p>
-                                </div>
-                            </div>
-
-                            {/* Address */}
-                            <div className="flex items-start justify-center gap-3 text-gray-700 mb-8">
-                                <MapPinIcon className="w-5 h-5 text-indigo-600 mt-0.5" />
-                                <p className="text-sm">123 Green Valley Road, Apt 4B, New York, NY 10001</p>
-                            </div>
-
-                            {/* Buttons */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <button
-                                    onClick={handleReschedule}
-                                    className="py-4 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                    I Won't Be Available
-                                </button>
-                                <button className="py-4 bg-green-700 rounded-xl text-white font-semibold hover:bg-green-800 transition flex items-center justify-center gap-2">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    I Will Be Available
-                                </button>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 )}
 

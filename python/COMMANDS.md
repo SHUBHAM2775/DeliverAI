@@ -9,7 +9,7 @@ cd work
 
 ### 2. Install Dependencies (First Time Only)
 ```powershell
-pip install -r requirements.txt
+pip install xgboost scikit-learn geopy python-dateutil fastapi uvicorn
 ```
 
 ### 3. Train Model (First Time Only)
