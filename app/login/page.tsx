@@ -141,11 +141,9 @@ export default function LoginPage() {
                         onClick={() => router.push("/")}
                         className="flex items-center gap-3 group"
                     >
-                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center font-bold text-white text-base shadow-sm group-hover:shadow-md transition">
-                            D
-                        </div>
+                        <img src="/logo.png" alt="DeliverAI" className="h-10 w-10 rounded-lg object-contain" />
                         <div className="text-left">
-                            <p className="text-base font-semibold text-gray-900">Dispatch</p>
+                            <p className="text-base font-semibold text-gray-900">DeliverAI</p>
                             <p className="text-xs text-gray-500">Unified access</p>
                         </div>
                     </button>
