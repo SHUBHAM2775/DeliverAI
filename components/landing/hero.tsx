@@ -8,7 +8,7 @@ const textRevealVariants = {
   hidden: { y: "100%" },
   visible: (i: number) => ({
     y: 0,
-    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: i * 0.1 },
+    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as any, delay: i * 0.1 },
   }),
 }
 
@@ -32,7 +32,7 @@ export function Hero() {
         </motion.div>
 
         <h1 className="mb-6 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
-          <span className="block overflow-hidden">
+          <span className="block pb-2">
             <motion.span
               className="block"
               variants={textRevealVariants}
@@ -43,7 +43,7 @@ export function Hero() {
               Smarter delivery slots.
             </motion.span>
           </span>
-          <span className="block overflow-hidden">
+          <span className="block pb-4">
             <motion.span
               className="block text-amber-600"
               variants={textRevealVariants}

@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import GoogleTranslate from "@/components/GoogleTranslate"
 
 export function Navbar() {
   const router = useRouter()
@@ -18,6 +19,7 @@ export function Navbar() {
           <span>DeliverAI</span>
         </a>
         <div className="flex gap-4">
+          <GoogleTranslate />
           <button
             type="button"
             onClick={() => router.push("/login")}

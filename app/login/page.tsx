@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
+import GoogleTranslate from "@/components/GoogleTranslate";
 import { UserGroupIcon, BriefcaseIcon, TruckIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 
 const roles = [
@@ -147,7 +148,10 @@ export default function LoginPage() {
                             <p className="text-xs text-gray-500">Unified access</p>
                         </div>
                     </button>
-                    <p className="text-sm text-gray-600">Secure Access</p>
+                    <div className="flex items-center gap-4">
+                        <p className="text-sm text-gray-600">Secure Access</p>
+                        <GoogleTranslate />
+                    </div>
                 </div>
             </nav>
 
