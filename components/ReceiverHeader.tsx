@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BellIcon, ChevronDownIcon, ArrowRightOnRectangleIcon, TrashIcon, CheckIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
+import GoogleTranslate from "./GoogleTranslate";
 
 interface ReceiverHeaderProps {
     title?: string;
@@ -168,6 +169,7 @@ export default function ReceiverHeader({
                 <p className="text-sm text-gray-500">{subtitle}</p>
             </div>
             <div className="flex items-center gap-6" ref={menuRef}>
+                <GoogleTranslate />
                 {/* Notifications Bell */}
                 <div ref={notifRef} className="relative">
                     <button
