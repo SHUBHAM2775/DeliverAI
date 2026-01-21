@@ -26,7 +26,7 @@ export default function ReceiverSidebar() {
     }, [router]);
 
     return (
-        <aside className="w-20 bg-neutral-900 text-white flex flex-col items-center py-6 px-0 flex-shrink-0 overflow-y-auto relative">
+        <aside className="w-20 bg-neutral-900 text-white flex flex-col items-center py-6 px-0 flex-shrink-0 overflow-y-hidden relative">
             {/* Logo */}
             <img src="/logo.png" alt="DeliverAI" className="h-10 w-10 rounded-lg object-contain mb-6" />
 

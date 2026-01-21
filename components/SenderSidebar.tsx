@@ -25,7 +25,7 @@ export default function SenderSidebar() {
     }, [router]);
 
     return (
-        <aside className="w-20 bg-neutral-900 text-white flex flex-col items-center py-6 px-0 flex-shrink-0 overflow-y-auto relative">
+        <aside className="w-20 bg-neutral-900 text-white flex flex-col items-center py-6 px-0 flex-shrink-0 overflow-y-hidden relative">
             {/* Logo */}
             <img src="/logo.png" alt="DeliverAI" className="h-10 w-10 rounded-lg object-contain mb-6" />
 
@@ -39,8 +39,8 @@ export default function SenderSidebar() {
                             <Link
                                 href={item.href}
                                 className={`p-2.5 rounded-lg transition block ${isActive
-                                        ? "bg-blue-600 text-white shadow-sm"
-                                        : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                                    ? "bg-blue-600 text-white shadow-sm"
+                                    : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
                                     }`}
                                 onMouseEnter={() => setHoveredItem(item.name)}
                                 onMouseLeave={() => setHoveredItem(null)}
