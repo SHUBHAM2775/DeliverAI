@@ -37,6 +37,8 @@ python fastapi_server.py
 ```
 Requires: MongoDB (MONGODB_URI), `delivery_slot_model.pkl`. Next.js `next.config.ts` proxies `/api/slots/recommend/:uuid` to `http://localhost:8000`.
 
+**GA integration:** After the ML model returns slots, `genetic_slot_optimizer.optimize_slots` refines the selection using success/risk and sender constraints (`startHour`/`endHour`, `failedDeliveryRate`, `firstAttemptSuccess`, `deliveryAttemptCount` from sender profile and order). The response is GA-optimized when the pool is valid; otherwise the raw ML result is returned. Run the GA standalone: `python genetic_slot_optimizer.py` (uses sample data or `recommendation_*.json` if present).
+
 ---
 
 ## 📋 Step-by-Step Execution
