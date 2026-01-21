@@ -53,7 +53,6 @@ export async function POST(request: Request) {
       selectedDate: date,
       confirmationStatus: 'CONFIRMED',
       confirmedAt: new Date(),
-      rescheduleCount: 0,
     };
 
     if (isCustomSlot) {
@@ -64,15 +63,45 @@ export async function POST(request: Request) {
       slotData.customSlot = slot;
     }
 
-    const confirmation = await SlotConfirmationModel.create(slotData);
+    // Check if a confirmation already exists for this order
+    const existingConfirmation = await SlotConfirmationModel.findOne({ orderId: finalOrderId });
+
+    let confirmation;
+    if (existingConfirmation) {
+      // Update existing confirmation (reschedule)
+      confirmation = await SlotConfirmationModel.findOneAndUpdate(
+        { orderId: finalOrderId },
+        {
+          ...slotData,
+          rescheduleCount: (existingConfirmation.rescheduleCount || 0) + 1,
+        },
+        { new: true }
+      );
+    } else {
+      // Create new confirmation
+      slotData.rescheduleCount = 0;
+      confirmation = await SlotConfirmationModel.create(slotData);
+    }
+
+    // Update the Order with the confirmed slot information
+    if (Types.ObjectId.isValid(orderId)) {
+      const updateData: any = {
+        orderStatus: 'CONFIRMED',
+        deliveryDate: new Date(date),
+        customSlotTime: slot,
+      };
+
+      await OrderModel.findByIdAndUpdate(orderId, updateData);
+    }
 
     return NextResponse.json(
       {
         success: true,
         confirmationId: confirmation._id,
-        message: 'Slot confirmed successfully',
+        message: existingConfirmation ? 'Slot rescheduled successfully' : 'Slot confirmed successfully',
+        isReschedule: !!existingConfirmation,
       },
-      { status: 201 }
+      { status: existingConfirmation ? 200 : 201 }
     );
   } catch (error) {
     console.error('Failed to create slot confirmation', error);
@@ -87,8 +116,13 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get('orderId');
 
-    if (!orderId) {
-      return NextResponse.json({ error: 'orderId is required' }, { status: 400 });
+    if (!orderId || orderId === 'undefined' || orderId === 'null') {
+      return NextResponse.json({ error: 'Valid orderId is required' }, { status: 400 });
+    }
+
+    // Validate ObjectId format using imported Types
+    if (!Types.ObjectId.isValid(orderId)) {
+      return NextResponse.json({ error: 'Invalid orderId format' }, { status: 400 });
     }
 
     const confirmation = await SlotConfirmationModel.findOne({ orderId })

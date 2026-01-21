@@ -152,9 +152,6 @@ export default function LandingPage() {
                 >
                   Login to Platform <ArrowRightIcon className="ml-2 h-5 w-5" />
                 </Button>
-                <Button variant="outline" size="md" className="min-w-[170px]">
-                  View Platform Features
-                </Button>
               </div>
             </div>
             <div className="w-full md:w-72 lg:w-80 bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-inner">

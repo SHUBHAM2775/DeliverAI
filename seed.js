@@ -87,6 +87,8 @@ async function seed() {
       User.deleteMany({}),
     ]);
     console.log("✅ Database cleaned\n");
+    // Default password for seeded users (will be hashed by any auth middleware if present)
+    const defaultPassword = process.env.SEED_USER_PASSWORD || "Password123!";
 
     // ═══════════════════════════════════════════════════════════════
     // SECTION 1: CREATE BASIC USERS
@@ -97,6 +99,8 @@ async function seed() {
         role: "ADMIN",
         name: "Amit Sharma",
         email: "admin@example.com",
+        phone: "+91 90000 00000",
+        password: defaultPassword,
         status: "ACTIVE",
       },
       {
@@ -104,12 +108,14 @@ async function seed() {
         name: "TechMart Electronics",
         email: "sender@example.com",
         phone: "+91 98765 43210",
+        password: defaultPassword,
       },
       {
         role: "RECEIVER",
         name: "Priya Patel",
         email: "receiver@example.com",
         phone: "+91 98765 43211",
+        password: defaultPassword,
       },
     ]);
     console.log(`✅ Created ${basicUsers.length} basic users\n`);
@@ -137,6 +143,7 @@ async function seed() {
         email: `test_driver_${i}@example.com`,
         phone: `+91${9000000000 + i}`,
         status: "ACTIVE",
+        password: defaultPassword,
       });
 
       allUsers.push(agentUser);

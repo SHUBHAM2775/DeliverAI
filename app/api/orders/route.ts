@@ -1,6 +1,7 @@
 
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
+import bcrypt from "bcryptjs";
 import connectDB from "@/lib/db";
 import OrderModel from "@/models/Order";
 import UserModel from "@/models/User";
@@ -19,6 +20,10 @@ type DeliverySlotInput = {
   endTime?: string;
 };
 
+async function passwordHashFrom(seed: string) {
+  return bcrypt.hash(seed || "rubix-temp-password", 10);
+}
+
 async function resolveSenderId() {
   // Prefer explicit sender id/email; fall back to first SENDER or create one.
   const defaultSenderId = process.env.DEFAULT_SENDER_ID;
@@ -35,9 +40,13 @@ async function resolveSenderId() {
   if (!sender) {
     sender = await UserModel.create({
       role: "SENDER",
+      roles: ["SENDER"],
       name: "Default Sender",
       email: defaultSenderEmail,
       phone: "N/A",
+      password: await passwordHashFrom(defaultSenderEmail),
+      isFirstTime: false,
+      status: "ACTIVE",
     });
   }
 
@@ -58,8 +67,13 @@ async function upsertReceiver({
     return (
       await UserModel.create({
         role: "RECEIVER",
+        roles: ["RECEIVER"],
         name,
         email: `receiver+${Date.now()}@example.com`,
+        phone: "N/A",
+        password: await passwordHashFrom(name),
+        isFirstTime: false,
+        status: "ACTIVE",
       })
     )._id;
   }
@@ -75,10 +89,13 @@ async function upsertReceiver({
   try {
     const receiver = await UserModel.create({
       role: "RECEIVER",
+      roles: ["RECEIVER"],
       status: "ACTIVE",
       name,
       email,
       phone,
+      password: await passwordHashFrom(phone || email || name),
+      isFirstTime: false,
     });
     return receiver._id;
   } catch (err) {
@@ -100,6 +117,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     // By default, return all orders. Pass all=false to filter by sender.
     const includeAll = searchParams.get("all") !== "false";
+    const statusFilter = searchParams.get("status"); // Add status filter
 
     const defaultSenderEmail = process.env.DEFAULT_SENDER_EMAIL || "sender@example.com";
     let sender = await UserModel.findOne({ email: defaultSenderEmail, role: "SENDER" });
@@ -113,32 +131,45 @@ export async function GET(req: Request) {
       return NextResponse.json({ orders: [] });
     }
 
-    const query = includeAll ? {} : { senderId: sender?._id };
+    // Build query with optional status filter
+    const query: any = includeAll ? {} : { senderId: sender?._id };
+    if (statusFilter) {
+      query.orderStatus = statusFilter;
+    }
 
     const orders = await OrderModel.find(query)
       .populate("receiverId", "name phone email")
+      .populate("agentId", "name phone email") // Also populate agent details
       .sort({ createdAt: -1 })
       .limit(50)
       .lean();
 
     const formattedOrders = orders.map((order: any) => ({
+      _id: order._id.toString(), // Add _id for compatibility
       id: order._id.toString(),
       commodity: order.commodityName,
+      commodityName: order.commodityName, // Add full field name
       category: order.commodityCategory || "N/A",
       customer: order.receiverId?.name || "Unknown",
       customerEmail: order.receiverId?.email,
       area: order.area,
       pincode: order.pincode,
+      deliveryAddress: order.deliveryAddress, // Add delivery address
       workingHours: order.workingStartTime && order.workingEndTime
         ? `${order.workingStartTime} - ${order.workingEndTime}`
         : "N/A",
       status: order.orderStatus,
+      orderStatus: order.orderStatus, // Add full field name
       description: order.description,
       quantity: order.quantity,
       isFragile: order.isFragile,
       createdAt: order.createdAt,
       pickupLat: order.geoLocation?.latitude,
       pickupLng: order.geoLocation?.longitude,
+      customSlotTime: order.customSlotTime, // Add custom slot time
+      deliveryDate: order.deliveryDate, // Add delivery date
+      agentId: order.agentId?._id?.toString(), // Add agent ID
+      agentName: order.agentId?.name, // Add agent name from populated data
     }));
 
     return NextResponse.json({ orders: formattedOrders });

@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react";
 import type { ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-import ProfileDropdown from "@/components/ProfileDropdown";
+import SenderHeader from "@/components/SenderHeader";
 import {
-    MagnifyingGlassIcon,
-    BellIcon,
     PhotoIcon,
     PlusIcon,
     XMarkIcon,
@@ -32,7 +30,6 @@ interface DeliverySlot {
 
 export default function DeliveryFormPage() {
     const router = useRouter();
-    const [isProfileOpen, setIsProfileOpen] = useState(false);
 
     // Sender profile state
     const [shopName, setShopName] = useState<string>("");
@@ -217,37 +214,7 @@ export default function DeliveryFormPage() {
                 }
             `}</style>
             <div className="p-6 min-h-full">
-                {/* Header */}
-                <header className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 relative z-10">
-                    <h1 className="text-xl font-bold text-gray-900">Create New Delivery</h1>
-                    <div className="flex items-center gap-5">
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Search orders..."
-                                className="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 w-48"
-                            />
-                            <MagnifyingGlassIcon className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                        </div>
-                        <button 
-                            className="p-2 hover:bg-gray-100 rounded-lg transition relative"
-                            onClick={() => router.push('/sender_page/notification')}
-                        >
-                            <BellIcon className="h-5 w-5 text-gray-600" />
-                            <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center">1</span>
-                        </button>
-                        <div 
-                            className="flex items-center gap-2 cursor-pointer transition relative"
-                            onClick={() => setIsProfileOpen(!isProfileOpen)}
-                        >
-                            <span className="text-sm font-medium text-gray-700">Rahul Sharma</span>
-                            <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-white font-semibold text-sm">
-                                RS
-                            </div>
-                            <ProfileDropdown isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
-                        </div>
-                    </div>
-                </header>
+                <SenderHeader title="Create New Delivery" subtitle="Fill in delivery details" />
 
                 {/* Form Layout - 2 columns */}
                 <div className="grid grid-cols-2 gap-5">

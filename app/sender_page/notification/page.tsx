@@ -2,15 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import ProfileDropdown from "@/components/ProfileDropdown";
+import SenderHeader from "@/components/SenderHeader";
 import {
-    MagnifyingGlassIcon,
-    BellIcon,
     CheckCircleIcon,
     CubeIcon,
     TruckIcon,
     XCircleIcon,
     ArrowPathIcon,
+    BellIcon,
 } from "@heroicons/react/24/outline";
 
 interface NotificationItem {
@@ -46,7 +45,6 @@ const formatTimestamp = (value?: string) => {
 
 export default function NotificationPage() {
     const router = useRouter();
-    const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [items, setItems] = useState<NotificationItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -74,37 +72,7 @@ export default function NotificationPage() {
     return (
         <div className="flex-1 overflow-y-auto bg-gray-50">
             <div className="p-8 min-h-full">
-                {/* Header */}
-                <header className="flex items-center justify-between mb-8 pb-6 border-b border-gray-200 relative z-10">
-                    <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-                    <div className="flex items-center gap-6">
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Search orders..."
-                                className="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 w-56"
-                            />
-                            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                        </div>
-                        <button 
-                            className="p-2 hover:bg-gray-100 rounded-lg transition relative"
-                            onClick={() => router.push('/sender_page/notification')}
-                        >
-                            <BellIcon className="h-5 w-5 text-gray-600" />
-                            <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">1</span>
-                        </button>
-                        <div 
-                            className="flex items-center gap-3 cursor-pointer transition relative"
-                            onClick={() => setIsProfileOpen(!isProfileOpen)}
-                        >
-                            <span className="text-sm font-medium text-gray-700">Rahul Sharma</span>
-                            <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-semibold">
-                                RS
-                            </div>
-                            <ProfileDropdown isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
-                        </div>
-                    </div>
-                </header>
+                <SenderHeader title="Notifications" subtitle="Stay updated with your deliveries" />
 
                 {/* Notifications List */}
                 <div className="space-y-4">
