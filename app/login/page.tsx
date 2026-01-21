@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
+import GoogleTranslate from "@/components/GoogleTranslate";
 import {
     UserGroupIcon,
     BriefcaseIcon,
@@ -63,7 +64,10 @@ export default function LoginPage() {
                     >
                         D
                     </div>
-                    <p className="text-sm text-gray-600">Role-Based Access</p>
+                    <div className="flex items-center gap-4">
+                        <p className="text-sm text-gray-600">Role-Based Access</p>
+                        <GoogleTranslate />
+                    </div>
                 </div>
             </nav>
 

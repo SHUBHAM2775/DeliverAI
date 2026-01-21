@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
+import GoogleTranslate from "@/components/GoogleTranslate";
 import {
   CheckCircleIcon,
   UserGroupIcon,
@@ -115,6 +116,7 @@ export default function LandingPage() {
             D
           </div>
           <div className="flex gap-4">
+            <GoogleTranslate />
             <Button
               variant="outline"
               size="md"

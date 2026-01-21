@@ -25,6 +25,27 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Google Translate: hide banner/widget chrome */
+iframe.goog-te-banner-frame,
+iframe.goog-te-balloon-frame,
+#goog-gt-tt,
+.goog-te-balloon-frame,
+.goog-te-banner-frame,
+.goog-te-gadget,
+.goog-te-gadget-simple,
+.goog-te-combo,
+.goog-te-menu-value,
+.VIpgJd-ZVi9od-ORHb-OEVmCD,
+.VIpgJd-ZVi9od-ORHb-OEVmCD img {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Prevent Google from pushing the page down */
+body {
+  top: 0 !important;
+}
+
 /* Scrollbar Styling - Translucent */
 ::-webkit-scrollbar {
   width: 8px;
