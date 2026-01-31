@@ -128,7 +128,8 @@ def get_slots_recommend(uuid: str):
         sender_id = order.get("senderId")
         if isinstance(sender_id, str):
             sender_id = ObjectId(sender_id)
-        profile = sender_profiles.find_one({"userId": sender_id}) if sender_id else None
+        profile = sender_profiles.find_one(
+            {"userId": sender_id}) if sender_id else None
         start_hour = profile.get("startHour") if profile else None
         end_hour = profile.get("endHour") if profile else None
         if start_hour:
@@ -149,7 +150,8 @@ def get_slots_recommend(uuid: str):
 
         da = order.get("deliveryAddress")
         if has_lat_lon(da):
-            delivery_lat, delivery_lon = float(da["latitude"]), float(da["longitude"])
+            delivery_lat, delivery_lon = float(
+                da["latitude"]), float(da["longitude"])
         else:
             delivery_lat, delivery_lon = 19.076, 72.877
 
@@ -177,17 +179,20 @@ def get_slots_recommend(uuid: str):
 
         if not result.get("success"):
             return JSONResponse(
-                content={"error": result.get("message", "ML recommendation failed")},
+                content={"error": result.get(
+                    "message", "ML recommendation failed")},
                 status_code=500,
             )
 
-        out_path = Path(__file__).resolve().parent / f"recommendation_{uuid}.json"
-        
+        out_path = Path(__file__).resolve().parent / \
+            f"recommendation_{uuid}.json"
+
         print(f"✅ Saving ML recommendation to: {out_path}")
         # print(f"🔍 ML Response Content:\n{json.dumps(_ensure_datetime_serializable(result), indent=2, default=str)}")
 
         with open(out_path, "w", encoding="utf-8") as f:
-            json.dump(_ensure_datetime_serializable(result), f, indent=2, default=str)
+            json.dump(_ensure_datetime_serializable(
+                result), f, indent=2, default=str)
 
         return result
     except Exception as e:
