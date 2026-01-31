@@ -1,4 +1,4 @@
-# DeliverAI - Role-Based Delivery Management Platform
+# DeliverAI
 
 DeliverAI is a full-stack delivery management system designed to optimize driver assignment, route planning, and time-slot based deliveries. It provides role-based dashboards for Admin, Sender, and Driver, supports geocoding of addresses, and offers installable PWA capabilities with an offline shell.
 
