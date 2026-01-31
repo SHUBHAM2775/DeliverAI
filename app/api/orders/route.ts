@@ -1,4 +1,3 @@
-
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
@@ -79,10 +78,14 @@ async function upsertReceiver({
   }
 
   // Try to find an existing receiver by email, then by phone
-  const existingByEmail = email ? await UserModel.findOne({ email }).lean() : null;
+  const existingByEmail = email
+    ? await UserModel.findOne({ email }).lean()
+    : null;
   if (existingByEmail) return existingByEmail._id;
 
-  const existingByPhone = phone ? await UserModel.findOne({ phone }).lean() : null;
+  const existingByPhone = phone
+    ? await UserModel.findOne({ phone }).lean()
+    : null;
   if (existingByPhone) return existingByPhone._id;
 
   // Create receiver; retry once if a duplicate key races in
@@ -119,8 +122,12 @@ export async function GET(req: Request) {
     const includeAll = searchParams.get("all") !== "false";
     const statusFilter = searchParams.get("status"); // Add status filter
 
-    const defaultSenderEmail = process.env.DEFAULT_SENDER_EMAIL || "sender@example.com";
-    let sender = await UserModel.findOne({ email: defaultSenderEmail, role: "SENDER" });
+    const defaultSenderEmail =
+      process.env.DEFAULT_SENDER_EMAIL || "sender@example.com";
+    let sender = await UserModel.findOne({
+      email: defaultSenderEmail,
+      role: "SENDER",
+    });
 
     // Fallback: if the configured sender email does not exist, use any SENDER to avoid empty dashboards.
     if (!sender) {
@@ -155,9 +162,10 @@ export async function GET(req: Request) {
       area: order.area,
       pincode: order.pincode,
       deliveryAddress: order.deliveryAddress, // Add delivery address
-      workingHours: order.workingStartTime && order.workingEndTime
-        ? `${order.workingStartTime} - ${order.workingEndTime}`
-        : "N/A",
+      workingHours:
+        order.workingStartTime && order.workingEndTime
+          ? `${order.workingStartTime} - ${order.workingEndTime}`
+          : "N/A",
       status: order.orderStatus,
       orderStatus: order.orderStatus, // Add full field name
       description: order.description,
@@ -175,7 +183,10 @@ export async function GET(req: Request) {
     return NextResponse.json({ orders: formattedOrders });
   } catch (error) {
     console.error("Failed to fetch orders", error);
-    return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch orders" },
+      { status: 500 },
+    );
   }
 }
 
@@ -199,7 +210,15 @@ export async function POST(req: Request) {
       deliverySlots = [],
     } = await req.json();
 
-    if (!customerName || !phone || !itemName || !category || !address || !area || !pincode) {
+    if (
+      !customerName ||
+      !phone ||
+      !itemName ||
+      !category ||
+      !address ||
+      !area ||
+      !pincode
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
@@ -247,9 +266,7 @@ export async function POST(req: Request) {
     if (!pickupLocation) {
       console.warn("⚠️  No pickup location provided");
     } else {
-      console.log(
-        `📍 Pickup → (${pickupLocation.lat}, ${pickupLocation.lng})`,
-      );
+      console.log(`📍 Pickup → (${pickupLocation.lat}, ${pickupLocation.lng})`);
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -280,7 +297,7 @@ export async function POST(req: Request) {
     const confirmationUuid = uuidv4();
 
     // Create order payload
-    
+
     const orderPayload = {
       senderId,
       receiverId,
@@ -304,7 +321,7 @@ export async function POST(req: Request) {
       receiverPhone: phone,
       deliveryLocation: deliveryLocation, // NEW: Customer address geocoded to lat/long
     };
-    
+
     const orderDoc = await OrderModel.create(orderPayload);
     console.log(
       `✅ Order created ${orderDoc._id} — addr: ${orderDoc.deliveryAddress}`,
@@ -317,7 +334,9 @@ export async function POST(req: Request) {
     if (pickupLocation) {
       await findTop5NearestDrivers(pickupLocation);
     } else {
-      console.warn("\n⚠️  Driver optimization SKIPPED (no pickup location available)");
+      console.warn(
+        "\n⚠️  Driver optimization SKIPPED (no pickup location available)",
+      );
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -386,10 +405,9 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Order creation failed", error);
     const message =
-      error instanceof Error ? error.message : "Unknown error while creating order";
-    return NextResponse.json(
-      { error: message },
-      { status: 500 },
-    );
+      error instanceof Error
+        ? error.message
+        : "Unknown error while creating order";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

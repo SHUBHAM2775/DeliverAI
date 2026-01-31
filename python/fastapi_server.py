@@ -29,7 +29,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MONGODB_URI = os.getenv("MONGODB_URI", "mongodb+srv://shubhamu1332:12345@rubix.a8hul0j.mongodb.net/Rubix?retryWrites=true&w=majority&appName=RUBIX")
+MONGODB_URI = os.getenv("MONGODB_URI")
+if not MONGODB_URI:
+    raise ValueError("MONGODB_URI environment variable is required")
 
 
 def get_db():

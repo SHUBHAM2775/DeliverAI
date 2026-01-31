@@ -1,10 +1,13 @@
 import { MongoClient } from "mongodb";
 
-const uri =
-  "mongodb+srv://shubhamu1332:12345@rubix.a8hul0j.mongodb.net/Rubix?appName=RUBIX";
+const uri = process.env.MONGODB_URI;
+
+if (!uri) {
+  throw new Error("MONGODB_URI environment variable is required");
+}
 
 async function connectDB() {
-  const client = new MongoClient(uri);
+  const client = new MongoClient(uri!);
 
   try {
     await client.connect();
