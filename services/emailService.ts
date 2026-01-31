@@ -57,7 +57,9 @@ export async function sendDeliveryConfirmationEmail(
   const textLines = [
     "Hello!",
     "",
-    orderDetails ? "Your delivery order has been created. Here are the details:" : "Your delivery is scheduled.",
+    orderDetails
+      ? "Your delivery order has been created. Here are the details:"
+      : "Your delivery is scheduled.",
   ];
 
   if (orderDetails) {
@@ -76,11 +78,15 @@ export async function sendDeliveryConfirmationEmail(
     if (orderDetails.isFragile) {
       textLines.push("- Fragile: Yes");
     }
-    textLines.push(`- Delivery Address: ${orderDetails.deliveryAddress}, ${orderDetails.area} - ${orderDetails.pincode}`);
+    textLines.push(
+      `- Delivery Address: ${orderDetails.deliveryAddress}, ${orderDetails.area} - ${orderDetails.pincode}`,
+    );
     textLines.push("");
   }
 
-  textLines.push("Please click on the link below to select your preferred delivery slot:");
+  textLines.push(
+    "Please click on the link below to select your preferred delivery slot:",
+  );
   textLines.push(confirmationUrl);
   textLines.push("");
   textLines.push("– DeliverAI");
@@ -92,8 +98,9 @@ export async function sendDeliveryConfirmationEmail(
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <h2 style="color: #333;">Hello!</h2>
       <p>${orderDetails ? "Your delivery order has been created. Here are the details:" : "Your delivery is scheduled."}</p>
-      ${orderDetails
-      ? `
+      ${
+        orderDetails
+          ? `
         <div style="background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin-top: 0; color: #333;">Order Details:</h3>
           <ul style="list-style: none; padding: 0;">
@@ -106,8 +113,8 @@ export async function sendDeliveryConfirmationEmail(
           </ul>
         </div>
       `
-      : ""
-    }
+          : ""
+      }
       <p>Please click on the link below to select your preferred delivery slot:</p>
       <div style="text-align: center; margin: 30px 0;">
         <a href="${confirmationUrl}" target="_blank" rel="noopener noreferrer" style="background-color: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
@@ -132,7 +139,9 @@ export async function sendDeliveryConfirmationEmail(
     return { success: true };
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Unknown error while sending email";
+      error instanceof Error
+        ? error.message
+        : "Unknown error while sending email";
 
     console.error("Failed to send delivery confirmation email", {
       to: toEmail,
@@ -233,7 +242,9 @@ export async function sendEmergencyAlertEmail(
     return { success: true };
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Unknown error while sending email";
+      error instanceof Error
+        ? error.message
+        : "Unknown error while sending email";
 
     console.error("Failed to send emergency alert email", {
       to: toEmail,
@@ -243,4 +254,3 @@ export async function sendEmergencyAlertEmail(
     return { success: false, error: message };
   }
 }
-

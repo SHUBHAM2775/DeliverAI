@@ -195,11 +195,10 @@ export default function EmergencyPage() {
                       return (
                         <label
                           key={order.id}
-                          className={`w-full p-4 rounded-lg border-2 transition block cursor-pointer ${
-                            checked
+                          className={`w-full p-4 rounded-lg border-2 transition block cursor-pointer ${checked
                               ? 'border-red-500 bg-red-50'
                               : 'border-gray-200 bg-white hover:border-red-300'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex items-start gap-3">
@@ -222,11 +221,10 @@ export default function EmergencyPage() {
                                 <p className="text-xs text-gray-500 mt-1">{order.area} • {order.pincode}</p>
                               </div>
                             </div>
-                            <span className={`text-xs font-semibold px-2 py-1 rounded ${
-                              order.status === 'CREATED' ? 'bg-blue-100 text-blue-800' :
-                              order.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
+                            <span className={`text-xs font-semibold px-2 py-1 rounded ${order.status === 'CREATED' ? 'bg-blue-100 text-blue-800' :
+                                order.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' :
+                                  'bg-gray-100 text-gray-800'
+                              }`}>
                               {order.status}
                             </span>
                           </div>
@@ -283,11 +281,10 @@ export default function EmergencyPage() {
                 onClick={handleSendEmergencyAlert}
                 disabled={isSubmitting || !isReadyToSend}
                 title={!isReadyToSend ? 'Please select an order and describe the disruption' : ''}
-                className={`px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition ${
-                  isReadyToSend
+                className={`px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition ${isReadyToSend
                     ? 'bg-red-600 text-white hover:bg-red-700 cursor-pointer'
                     : 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-70'
-                }`}
+                  }`}
               >
                 <ExclamationTriangleIcon className="w-5 h-5" />
                 {isSubmitting ? 'Sending Alert...' : 'Send Emergency Alert'}
