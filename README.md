@@ -77,22 +77,6 @@ services/           External services (email, SMS)
 store/              State management
 ```
 
-## Environment Variables
-
-Create a `.env.local` file with the following values:
-
-- `MONGODB_URI`=
-- `MONGODB_DB`=
-- `JWT_SECRET`=
-- `TWILIO_ACCOUNT_SID`=
-- `TWILIO_AUTH_TOKEN`=
-- `TWILIO_PHONE_NUMBER`=
-- `EMAIL_HOST`=
-- `EMAIL_PORT`=
-- `EMAIL_USER`=
-- `EMAIL_PASS`=
-- `PYTHON_API_URL`=
-
 ## Getting Started
 
 ### Install Dependencies
