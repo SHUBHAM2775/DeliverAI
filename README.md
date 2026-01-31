@@ -1,4 +1,4 @@
-# DeliverAI - Role-Based Delivery Management Platform
+# DeliverAI
 
 DeliverAI is a full-stack delivery management system designed to optimize driver assignment, route planning, and time-slot based deliveries. It provides role-based dashboards for Admin, Sender, and Driver, supports geocoding of addresses, and offers installable PWA capabilities with an offline shell.
 
@@ -77,22 +77,6 @@ services/           External services (email, SMS)
 store/              State management
 ```
 
-## Environment Variables
-
-Create a `.env.local` file with the following values:
-
-- `MONGODB_URI`=
-- `MONGODB_DB`=
-- `JWT_SECRET`=
-- `TWILIO_ACCOUNT_SID`=
-- `TWILIO_AUTH_TOKEN`=
-- `TWILIO_PHONE_NUMBER`=
-- `EMAIL_HOST`=
-- `EMAIL_PORT`=
-- `EMAIL_USER`=
-- `EMAIL_PASS`=
-- `PYTHON_API_URL`=
-
 ## Getting Started
 
 ### Install Dependencies
@@ -121,24 +105,6 @@ Create a `.env.local` file with the following values:
 3. Driver optimization selects top 5 nearest drivers.
 4. **Driver** accepts the request and updates status.
 5. **Admin** monitors progress and operational metrics.
-
-## Future Enhancements
-
-- Real-time updates via WebSockets
-- Live traffic-aware routing
-- Payment integration
-- Native mobile app
-- Advanced analytics and alerts
-
-## Screenshots
-
-- Admin Dashboard (placeholder)
-- Sender Order Creation (placeholder)
-- Driver Requests (placeholder)
-
-## Contributing
-
-Contributions are welcome. Please open an issue or submit a pull request with a clear description of your changes.
 
 ## License
 

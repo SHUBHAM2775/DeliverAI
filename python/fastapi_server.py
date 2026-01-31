@@ -18,6 +18,7 @@ from fastapi.responses import JSONResponse
 from pymongo import MongoClient
 
 from api import recommend_delivery_slots
+from genetic_slot_optimizer import optimize_slots
 
 app = FastAPI(title="Delivery Slot ML API", version="1.0.0")
 
@@ -165,6 +166,7 @@ def get_slots_recommend(uuid: str):
         pickup_window = f"{start_hour:02d}:00-{end_hour:02d}:00"
         seller_range = f"{start_hour}-{end_hour}"
 
+        top_n_per_day = 8
         result = recommend_delivery_slots(
             store_id=store_id,
             pickup_availability_window=pickup_window,
@@ -174,7 +176,7 @@ def get_slots_recommend(uuid: str):
             store_latitude=store_lat,
             store_longitude=store_lon,
             date_range_days=7,
-            top_n_per_day=8,
+            top_n_per_day=top_n_per_day,
         )
 
         if not result.get("success"):
@@ -184,12 +186,39 @@ def get_slots_recommend(uuid: str):
                 status_code=500,
             )
 
+        # GA optimization: runs after ML, refines slot selection using success/risk and constraints
+        by_date = result.get("recommendations_by_date") or {}
+        flat = []
+        for arr in by_date.values():
+            flat.extend(arr if isinstance(arr, list) else [])
+
+        sender_profile = {
+            "startHour": start_hour,
+            "endHour": end_hour,
+            "failedDeliveryRate": (profile or {}).get("failedDeliveryRate"),
+            "firstAttemptSuccess": order.get("firstAttemptSuccess"),
+            "deliveryAttemptCount": order.get("deliveryAttemptCount") or 0,
+        }
+        optimized = optimize_slots(
+            flat, sender_profile, top_n_per_day=top_n_per_day)
+
+        if optimized:
+            rec_by_date = {}
+            for s in optimized:
+                d = str(s.get("date", ""))
+                if d not in rec_by_date:
+                    rec_by_date[d] = []
+                rec_by_date[d].append(s)
+            result = {
+                "success": True,
+                "recommendations_by_date": rec_by_date,
+                "message": (result.get("message") or "") + " (GA-optimized)",
+            }
+
         out_path = Path(__file__).resolve().parent / \
             f"recommendation_{uuid}.json"
 
-        print(f"✅ Saving ML recommendation to: {out_path}")
-        # print(f"🔍 ML Response Content:\n{json.dumps(_ensure_datetime_serializable(result), indent=2, default=str)}")
-
+        print(f"✅ Saving recommendation to: {out_path}")
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(_ensure_datetime_serializable(
                 result), f, indent=2, default=str)

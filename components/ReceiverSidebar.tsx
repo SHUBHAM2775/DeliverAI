@@ -26,33 +26,50 @@ export default function ReceiverSidebar() {
     }, [router]);
 
     return (
-        <aside className="w-20 bg-neutral-900 text-white flex flex-col items-center py-6 px-0 flex-shrink-0 overflow-y-auto relative">
+        <aside className="w-20 bg-neutral-900 text-white flex flex-col items-center py-6 px-0 flex-shrink-0 overflow-y-hidden relative">
             {/* Logo */}
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center font-bold text-sm mb-6 shadow-sm">
-                D
-            </div>
+            <img src="/logo.png" alt="DeliverAI" className="h-10 w-10 rounded-lg object-contain mb-6" />
 
             {/* Navigation */}
             <nav className="flex flex-col gap-2 items-center">
                 {receiverMenuItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                    const isSlotSelection = item.name === "Slot Selection";
+
                     return (
                         <div key={item.name} className="relative">
-                            <Link
-                                href={item.href}
-                                className={`p-2.5 rounded-lg transition block ${isActive
+                            {isSlotSelection ? (
+                                // Disabled slot selection - not clickable
+                                <div
+                                    className="p-2.5 rounded-lg cursor-not-allowed opacity-40"
+                                    onMouseEnter={() => setHoveredItem(item.name)}
+                                    onMouseLeave={() => setHoveredItem(null)}
+                                >
+                                    <Icon className="h-6 w-6 text-neutral-600" />
+                                </div>
+                            ) : (
+                                // Regular clickable link
+                                <Link
+                                    href={item.href}
+                                    className={`p-2.5 rounded-lg transition block ${isActive
                                         ? "bg-blue-600 text-white shadow-sm"
                                         : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
-                                    }`}
-                                onMouseEnter={() => setHoveredItem(item.name)}
-                                onMouseLeave={() => setHoveredItem(null)}
-                            >
-                                <Icon className="h-6 w-6" />
-                            </Link>
+                                        }`}
+                                    onMouseEnter={() => setHoveredItem(item.name)}
+                                    onMouseLeave={() => setHoveredItem(null)}
+                                >
+                                    <Icon className="h-6 w-6" />
+                                </Link>
+                            )}
                             {hoveredItem === item.name && (
                                 <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-black px-3 py-1.5 rounded-md whitespace-nowrap text-sm font-medium text-white pointer-events-none z-50">
                                     {item.name}
+                                    {isSlotSelection && (
+                                        <span className="block text-xs text-gray-400 mt-0.5">
+                                            Access via email link only
+                                        </span>
+                                    )}
                                 </div>
                             )}
                         </div>

@@ -83,7 +83,7 @@ export async function sendDeliveryConfirmationEmail(
   textLines.push("Please click on the link below to select your preferred delivery slot:");
   textLines.push(confirmationUrl);
   textLines.push("");
-  textLines.push("– Smart Delivery System");
+  textLines.push("– DeliverAI");
 
   const textBody = textLines.join("\n");
 
@@ -92,9 +92,8 @@ export async function sendDeliveryConfirmationEmail(
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <h2 style="color: #333;">Hello!</h2>
       <p>${orderDetails ? "Your delivery order has been created. Here are the details:" : "Your delivery is scheduled."}</p>
-      ${
-        orderDetails
-          ? `
+      ${orderDetails
+      ? `
         <div style="background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin-top: 0; color: #333;">Order Details:</h3>
           <ul style="list-style: none; padding: 0;">
@@ -107,15 +106,15 @@ export async function sendDeliveryConfirmationEmail(
           </ul>
         </div>
       `
-          : ""
-      }
+      : ""
+    }
       <p>Please click on the link below to select your preferred delivery slot:</p>
       <div style="text-align: center; margin: 30px 0;">
         <a href="${confirmationUrl}" target="_blank" rel="noopener noreferrer" style="background-color: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
           Select Delivery Slot
         </a>
       </div>
-      <p style="color: #666; font-size: 12px; margin-top: 30px;">– Smart Delivery System</p>
+      <p style="color: #666; font-size: 12px; margin-top: 30px;">– DeliverAI</p>
     </div>
   `;
 
@@ -182,7 +181,7 @@ export async function sendEmergencyAlertEmail(
     rescheduleUrl,
     "",
     "We apologize for the inconvenience and appreciate your understanding.",
-    "– Smart Delivery System",
+    "– DeliverAI",
   ];
 
   const textBody = textLines.join("\n");
@@ -216,7 +215,7 @@ export async function sendEmergencyAlertEmail(
         </p>
       </div>
 
-      <p style="color: #666; font-size: 12px; margin-top: 30px; text-align: center;">– Smart Delivery System</p>
+      <p style="color: #666; font-size: 12px; margin-top: 30px; text-align: center;">– DeliverAI</p>
     </div>
   `;
 

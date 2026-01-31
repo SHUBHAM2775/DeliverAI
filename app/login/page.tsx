@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
+import GoogleTranslate from "@/components/GoogleTranslate";
 import { UserGroupIcon, BriefcaseIcon, TruckIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 
 const roles = [
@@ -141,15 +142,16 @@ export default function LoginPage() {
                         onClick={() => router.push("/")}
                         className="flex items-center gap-3 group"
                     >
-                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center font-bold text-white text-base shadow-sm group-hover:shadow-md transition">
-                            D
-                        </div>
+                        <img src="/logo.png" alt="DeliverAI" className="h-10 w-10 rounded-lg object-contain" />
                         <div className="text-left">
-                            <p className="text-base font-semibold text-gray-900">Dispatch</p>
+                            <p className="text-base font-semibold text-gray-900">DeliverAI</p>
                             <p className="text-xs text-gray-500">Unified access</p>
                         </div>
                     </button>
-                    <p className="text-sm text-gray-600">Secure Access</p>
+                    <div className="flex items-center gap-4">
+                        <p className="text-sm text-gray-600">Secure Access</p>
+                        <GoogleTranslate />
+                    </div>
                 </div>
             </nav>
 
@@ -220,9 +222,6 @@ export default function LoginPage() {
                                 )}
 
                                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                    <div className="text-sm text-gray-600">
-                                        Prototype only. No real authentication is implemented.
-                                    </div>
                                     <div className="flex items-center gap-3">
                                         <Button type="button" variant="outline" onClick={() => router.push("/")}>
                                             Back to Landing

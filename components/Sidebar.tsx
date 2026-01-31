@@ -33,11 +33,9 @@ export default function Sidebar() {
     }, [router]);
 
     return (
-        <aside className="w-20 bg-neutral-900 text-white flex flex-col items-center py-6 px-0 flex-shrink-0 overflow-y-auto relative">
+        <aside className="w-20 bg-neutral-900 text-white flex flex-col items-center py-6 px-0 flex-shrink-0 overflow-y-hidden relative">
             {/* Logo */}
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center font-bold text-sm mb-6 shadow-sm">
-                D
-            </div>
+            <img src="/logo.png" alt="DeliverAI" className="h-10 w-10 rounded-lg object-contain mb-6" />
 
             {/* Navigation */}
             <nav className="flex flex-col gap-2 items-center">

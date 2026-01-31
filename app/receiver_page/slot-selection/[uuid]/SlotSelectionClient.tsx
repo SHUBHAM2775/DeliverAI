@@ -89,6 +89,58 @@ function slotStyle(success: number, risk: number): { bg: string; text: string } 
     return { bg: "bg-[#FECACA]", text: "text-red-700" };
 }
 
+function isSlotInPast(slotRec: SlotRecommendation, slotDate: string): boolean {
+    const now = new Date();
+    const today = now.toISOString().split("T")[0];
+    
+    console.log(`[Slot Check] slotDate: ${slotDate}, today: ${today}, slot: ${slotRec.slot}, period: ${slotRec.period}`);
+    
+    // If the slot is not for today, it's in the future
+    if (slotDate !== today) {
+        console.log(`[Slot Check] Not today - returning false`);
+        return false;
+    }
+    
+    // Parse slot time (format: "10-11" for 10 AM - 11 AM)
+    const parts = slotRec.slot.split("-");
+    if (parts.length < 2) {
+        console.log(`[Slot Check] Invalid slot format`);
+        return false;
+    }
+    
+    const endStr = parts[1].trim();
+    let endHour = parseInt(endStr, 10);
+    
+    console.log(`[Slot Check] Parsed endHour: ${endHour}, period: ${slotRec.period}`);
+    
+    // Adjust for PM slots
+    if (slotRec.period === "PM" && endHour !== 12) {
+        endHour += 12;
+    } else if (slotRec.period === "AM" && endHour === 12) {
+        endHour = 0;
+    }
+    
+    const currentHour = now.getHours();
+    const currentMinutes = now.getMinutes();
+    
+    // Current time + 2 hours
+    let cutoffHour = currentHour + 2;
+    
+    // Handle hour overflow
+    if (cutoffHour >= 24) {
+        cutoffHour = cutoffHour - 24;
+    }
+    
+    console.log(`[Slot Check] Current: ${currentHour}:${String(currentMinutes).padStart(2, '0')}, Cutoff: ${cutoffHour}:${String(currentMinutes).padStart(2, '0')}, EndHour: ${endHour}`);
+    
+    // Slot is unavailable if end hour is less than or equal to cutoff hour
+    const isDisabled = endHour < cutoffHour || (endHour === cutoffHour && currentMinutes > 0);
+    
+    console.log(`[Slot Check] Result: ${isDisabled ? 'DISABLED' : 'ENABLED'}`);
+    
+    return isDisabled;
+}
+
 export default function SlotSelectionClient({ orderData, uuid }: SlotSelectionClientProps) {
     const router = useRouter();
     const [recommendations, setRecommendations] = useState<RecommendationsResponse | null>(null);
@@ -146,6 +198,17 @@ export default function SlotSelectionClient({ orderData, uuid }: SlotSelectionCl
             alert("Please select a time slot first");
             return;
         }
+
+        // Validate that selected slot is not in the past/unavailable
+        const [slotDate, slotTime] = selectedSlot.includes("_") ? selectedSlot.split("_") : [effectiveDate, selectedSlot];
+        const selectedSlotObj = slotsForDay.find(s => s.slot === slotTime);
+        
+        if (selectedSlotObj && isSlotInPast(selectedSlotObj, slotDate)) {
+            alert("This time slot is no longer available. Please select another slot.");
+            setSelectedSlot(null);
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const [d, slot] = selectedSlot.includes("_") ? selectedSlot.split("_") : [effectiveDate, selectedSlot];
@@ -166,6 +229,18 @@ export default function SlotSelectionClient({ orderData, uuid }: SlotSelectionCl
         const first = daysWindow[0]?.fullDate;
         if (first) setSelectedDate(first);
     }, [loading, selectedDate, daysWindow]);
+
+    // Auto-deselect slot if it becomes unavailable
+    useEffect(() => {
+        if (!selectedSlot || loading) return;
+        
+        const [slotDate, slotTime] = selectedSlot.includes("_") ? selectedSlot.split("_") : [effectiveDate, selectedSlot];
+        const selectedSlotObj = slotsForDay.find(s => s.slot === slotTime);
+        
+        if (selectedSlotObj && isSlotInPast(selectedSlotObj, slotDate)) {
+            setSelectedSlot(null);
+        }
+    }, [selectedSlot, effectiveDate, slotsForDay, loading]);
 
     const bestSlotForDay = slotsForDay.length > 0
         ? slotsForDay.reduce((a, b) => (a.success_probability >= b.success_probability ? a : b))
@@ -259,23 +334,34 @@ export default function SlotSelectionClient({ orderData, uuid }: SlotSelectionCl
                                         const style = slotStyle(s.success_probability, s.risk_score);
                                         const reasons = Array.isArray(s.risk_reasons) ? s.risk_reasons : (s.risk_reasons ? [String(s.risk_reasons)] : []);
                                         const isAiPick = bestSlotForDay && bestSlotForDay.slot === s.slot && bestSlotForDay.date === s.date;
+                                        const isPastSlot = isSlotInPast(s, s.date);
+                                        
                                         return (
                                             <div
                                                 key={key}
-                                                onClick={() => setSelectedSlot(key)}
-                                                className={`${style.bg} rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02] relative ${selectedSlot === key ? "ring-4 ring-indigo-500 ring-offset-2" : ""}`}
+                                                onClick={() => !isPastSlot && setSelectedSlot(key)}
+                                                className={`rounded-xl p-4 transition-all relative ${
+                                                    isPastSlot
+                                                        ? "bg-gray-300 cursor-not-allowed opacity-60"
+                                                        : `${style.bg} cursor-pointer hover:scale-[1.02]`
+                                                } ${selectedSlot === key && !isPastSlot ? "ring-4 ring-indigo-500 ring-offset-2" : ""}`}
                                             >
-                                                {isAiPick && (
+                                                {isPastSlot && (
+                                                    <div className="absolute inset-0 flex items-center justify-center rounded-xl">
+                                                        <span className="text-[10px] font-bold text-gray-600 bg-white/60 px-2 py-1 rounded">Unavailable</span>
+                                                    </div>
+                                                )}
+                                                {isAiPick && !isPastSlot && (
                                                     <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1 bg-gray-900 text-white">
                                                         <SparklesIcon className="w-3 h-3" /> AI Pick
                                                     </div>
                                                 )}
-                                                <div className="text-center">
-                                                    <p className={`text-lg font-bold ${style.text} mb-1`}>{slotToLabel(s.slot)}</p>
-                                                    <p className={`text-xl font-semibold ${style.text}`}>{Number(s.success_probability).toFixed(1)}%</p>
+                                                <div className={`text-center ${isPastSlot ? "opacity-50" : ""}`}>
+                                                    <p className={`text-lg font-bold ${isPastSlot ? "text-gray-500" : style.text} mb-1`}>{slotToLabel(s.slot)}</p>
+                                                    <p className={`text-xl font-semibold ${isPastSlot ? "text-gray-500" : style.text}`}>{Number(s.success_probability).toFixed(1)}%</p>
                                                     <p className="text-xs text-gray-500 mt-1">Success</p>
                                                     <p className="text-xs text-gray-600 mt-0.5">Risk: {Number(s.risk_score).toFixed(1)}%</p>
-                                                    {reasons.length > 0 && (
+                                                    {reasons.length > 0 && !isPastSlot && (
                                                         <p className="text-[10px] text-amber-700 mt-1 line-clamp-2">{reasons.join(", ")}</p>
                                                     )}
                                                 </div>
@@ -305,8 +391,8 @@ export default function SlotSelectionClient({ orderData, uuid }: SlotSelectionCl
                                             key={idx}
                                             onClick={() => setSelectedDate(day.fullDate)}
                                             className={`p-2 rounded-lg text-center transition ${selectedDate === day.fullDate
-                                                    ? 'bg-indigo-500 text-white'
-                                                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                                                ? 'bg-indigo-500 text-white'
+                                                : 'bg-white text-gray-700 hover:bg-gray-100'
                                                 }`}
                                         >
                                             <div className="text-[10px] font-medium">{day.dayName}</div>
@@ -319,7 +405,7 @@ export default function SlotSelectionClient({ orderData, uuid }: SlotSelectionCl
                             {/* Time Slider */}
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-3">
-                                    Your Available Time: <span className="text-indigo-600">{preferredTime}:00</span>
+                                    Your Available Time: <span className="text-indigo-600">{preferredTime}:00 - {preferredTime + 1}:00</span>
                                 </label>
                                 <p className="text-xs text-gray-500 mb-2">Set your preferred time when you're available for delivery</p>
                                 <div className="relative">
